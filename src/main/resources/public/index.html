@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Website Analyzer - Saraci Design</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+</head>
+<body>
+<header>
+  <div class="container header-content">
+    <div class="logo">
+      <img src="images/logo.png" alt="Saraci Design Logo">
+      <div class="logo-text">
+        <h1>Website Analyzer</h1>
+        <p>Saraci Design</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="container">
+    <div class="nav-container">
+      <a href="/" class="nav-link active">Analyse-Tool</a>
+      <a href="/dashboard.html" class="nav-link">Dashboard</a>
+      <a href="/schedules.html" class="nav-link">Zeitpläne</a>
+    </div>
+  </div>
+</nav>
+
+<div class="main-content">
+  <div class="container">
+    <div id="alertContainer"></div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Website analysieren</h2>
+      </div>
+      <div class="card-body">
+        <form id="analyzeForm">
+          <div class="form-group">
+            <label for="url">Website-URL</label>
+            <input type="url" id="url" name="url" placeholder="https://beispiel.de" required>
+            <span class="input-hint">Gib die vollständige URL der zu analysierenden Website ein</span>
+          </div>
+
+          <div class="form-group">
+            <label for="email">E-Mail-Adresse (optional)</label>
+            <input type="email" id="email" name="email" placeholder="deine@email.de">
+            <span class="input-hint">Gib deine E-Mail-Adresse ein, um den Bericht zugesendet zu bekommen</span>
+          </div>
+
+          <button type="submit" class="btn btn-block">Website analysieren</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="loader-container" id="loader">
+      <div class="loader"></div>
+      <p>Analyse läuft...</p>
+      <p class="input-hint">Dies kann je nach Website-Größe einige Minuten dauern</p>
+    </div>
+
+    <div class="card" id="resultsCard" style="display: none;">
+      <div class="card-header">
+        <h2>Analyseergebnisse</h2>
+      </div>
+      <div class="card-body">
+        <div id="resultContent"></div>
+        <div class="form-group" style="text-align: center; margin-top: 20px;">
+          <button id="downloadReportBtn" class="btn">PDF-Bericht herunterladen</button>
+          <button id="viewDetailsBtn" class="btn btn-secondary" style="margin-left: 10px;">Zur Detailansicht</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="container footer-content">
+    <div class="footer-text">
+      &copy; 2024 Saraci Design. Alle Rechte vorbehalten.
+    </div>
+    <div class="footer-links">
+      <a href="/">Analyse-Tool</a>
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/schedules.html">Zeitpläne</a>
+      <a href="https://saraci-design.de" target="_blank">Saraci Design</a>
+    </div>
+  </div>
+</footer>
+
+<script src="js/utils.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      const analyzeForm = document.getElementById('analyzeForm');
+      const loader = document.getElementById('loader');
+      const resultsCard = document.getElementById('resultsCard');
+      const resultContent = document.getElementById('resultContent');
+      const downloadReportBtn = document.getElementById('downloadReportBtn');
+      const viewDetailsBtn = document.getElementById('viewDetailsBtn');
+
+      // Analysieren-Formular absenden
+      analyzeForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+
+          const url = document.getElementById('url').value;
+          const email = document.getElementById('email').value;
+
+          // Formular ausblenden und Loader anzeigen
+          analyzeForm.style.display = 'none';
+          loader.style.display = 'block';
+          resultsCard.style.display = 'none';
+
+          try {
+              // API-Anfrage senden
+              const data = { url, email };
+              const response = await apiRequest('/analyze', 'POST', data);
+
+              // Loader ausblenden und Ergebnisse anzeigen
+              loader.style.display = 'none';
+              resultsCard.style.display = 'block';
+
+              // Ergebnisse anzeigen
+              displayResults(response, url);
+
+              // Download-Button konfigurieren
+              if (response.pdfPath) {
+                  downloadReportBtn.onclick = function() {
+                      window.location.href = `/api/reports/${response.pdfPath.split('/').pop()}`;
+                  };
+                  downloadReportBtn.style.display = 'inline-block';
+              } else {
+                  downloadReportBtn.style.display = 'none';
+              }
+
+              // Details-Button konfigurieren
+              viewDetailsBtn.onclick = function() {
+                  window.location.href = `/dashboard.html?url=${encodeURIComponent(url)}`;
+              };
+
+              // Formular wieder anzeigen
+              analyzeForm.style.display = 'block';
+
+          } catch (error) {
+              // Fehler anzeigen
+              showAlert(error.message || 'Ein Fehler ist bei der Analyse aufgetreten', 'error');
+
+              // Loader ausblenden und Formular anzeigen
+              loader.style.display = 'none';
+              analyzeForm.style.display = 'block';
+          }
+      });
+
+      // Funktion zum Anzeigen der Ergebnisse
+      function displayResults(response, url) {
+          const report = response.report || {};
+
+          let html = `
+              <div class="alert alert-success">
+                  Die Analyse für <strong>${truncateUrl(url)}</strong> wurde erfolgreich abgeschlossen!
+              </div>
+
+              <h3 style="margin-top: 20px; margin-bottom: 15px;">Gesamtbewertung</h3>
+              <div style="display: flex; justify-content: space-around; flex-wrap: wrap; margin-bottom: 30px;">
+          `;
+
+          // SEO-Score
+          const seoScore = report.seo?.score || 'N/A';
+          html += createScoreHTML(seoScore, 'SEO');
+
+          // Performance-Score
+          const perfScore = report.performance?.score || 'N/A';
+          html += createScoreHTML(perfScore, 'Performance');
+
+          // Sicherheits-Score
+          const secScore = report.security?.securityHeadersScore || 'N/A';
+          html += createScoreHTML(secScore, 'Sicherheit');
+
+          html += `
+              </div>
+
+              <h3 style="margin-top: 30px; margin-bottom: 15px;">Wichtigste Erkenntnisse</h3>
+              <ul style="margin-left: 20px;">
+          `;
+
+          // Erkenntnisse basierend auf den Scores
+          const insights = generateInsights(report);
+          insights.forEach(insight => {
+              html += `<li>${insight}</li>`;
+          });
+
+          html += `
+              </ul>
+
+              <p style="margin-top: 30px; color: var(--text-color-secondary);">
+                  Weitere Details und historische Daten findest du im Dashboard.
+              </p>
+          `;
+
+          resultContent.innerHTML = html;
+      }
+
+      // Funktion zum Erstellen der Score-HTML
+      function createScoreHTML(score, label) {
+          const scoreClass = getScoreClass(score);
+
+          return `
+              <div class="score-item" style="text-align: center; margin: 0 10px 20px;">
+                  <div class="score-circle ${scoreClass}">
+                      <div class="score-value">${score}</div>
+                  </div>
+                  <div class="score-label">${label}</div>
+              </div>
+          `;
+      }
+
+      // Funktion zum Generieren von Erkenntnissen basierend auf den Ergebnissen
+      function generateInsights(report) {
+          const insights = [];
+
+          // SEO-Erkenntnisse
+          if (report.seo) {
+              if (report.seo.meta?.titleLength < 30 || report.seo.meta?.titleLength > 60) {
+                  insights.push('Der Seitentitel hat nicht die optimale Länge (30-60 Zeichen).');
+              }
+
+              if (report.seo.headings?.h1 !== 1) {
+                  insights.push(`Die Seite hat ${report.seo.headings?.h1 || 0} H1-Elemente (optimal: genau 1).`);
+              }
+
+              if (report.seo.images?.withoutAlt > 0) {
+                  insights.push(`${report.seo.images.withoutAlt} Bilder haben keinen Alt-Text.`);
+              }
+          }
+
+          // Performance-Erkenntnisse
+          if (report.performance) {
+              if (report.performance.score < 50) {
+                  insights.push('Die Website hat erhebliche Performance-Probleme.');
+              } else if (report.performance.score < 80) {
+                  insights.push('Die Website-Performance könnte verbessert werden.');
+              }
+          }
+
+          // Sicherheits-Erkenntnisse
+          if (report.security) {
+              if (!report.security.https?.enabled) {
+                  insights.push('Die Website verwendet kein HTTPS, was ein Sicherheitsrisiko darstellt.');
+              }
+
+              if (report.security.securityHeadersScore < 50) {
+                  insights.push('Wichtige Sicherheits-Header fehlen auf der Website.');
+                   }
+               }
+
+               // Standard-Erkenntnis, wenn keine anderen vorhanden sind
+               if (insights.length === 0) {
+                   insights.push('Die Website ist gut optimiert. Keine kritischen Probleme gefunden.');
+               }
+
+               return insights;
+           }
+       });
+</script>
+</body>
+</html>

@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Website Analyzer</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<header>
+    <div class="container header-content">
+        <div class="logo">
+            <img src="images/logo.png" alt="Saraci Design Logo">
+            <div class="logo-text">
+                <h1>Website Analyzer</h1>
+                <p>Dashboard</p>
+            </div>
+        </div>
+    </div>
+</header>
+
+<nav>
+    <div class="container">
+        <div class="nav-container">
+            <a href="/" class="nav-link">Analyse-Tool</a>
+            <a href="/dashboard.html" class="nav-link active">Dashboard</a>
+            <a href="/schedules.html" class="nav-link">Zeitpläne</a>
+        </div>
+    </div>
+</nav>
+
+<div class="main-content">
+    <div class="container">
+        <div id="alertContainer"></div>
+
+        <!-- Websites-Liste -->
+        <div id="websitesList">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Analysierte Websites</h2>
+                </div>
+                <div class="card-body">
+                    <div class="loader-container" id="websitesLoader">
+                        <div class="loader"></div>
+                        <p>Websites werden geladen...</p>
+                    </div>
+                    <div id="websitesGrid" class="grid"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Website-Historie -->
+        <div id="websiteHistory" style="display: none;">
+            <button id="backToListBtn" class="btn btn-secondary" style="margin-bottom: 20px;">
+                ← Zurück zur Übersicht
+            </button>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 id="historyTitle">Website-Historie</h2>
+                </div>
+                <div class="card-body">
+                    <div class="loader-container" id="historyLoader">
+                        <div class="loader"></div>
+                        <p>Historie wird geladen...</p>
+                    </div>
+
+                    <div id="historyContent" style="display: none;">
+                        <!-- Score-Verlauf-Diagramm -->
+                        <div style="margin-bottom: 30px;">
+                            <h3 style="margin-bottom: 15px;">Score-Verlauf</h3>
+                            <div style="height: 300px;">
+                                <canvas id="historyChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Letzte Analyseergebnisse -->
+                        <h3 style="margin-bottom: 15px;">Letzte Analysen</h3>
+                        <div class="table-container">
+                            <table id="analysesTable">
+                                <thead>
+                                <tr>
+                                    <th>Datum</th>
+                                    <th>SEO</th>
+                                    <th>Performance</th>
+                                    <th>Sicherheit</th>
+                                    <th>Aktionen</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <!-- Analysen werden hier eingefügt -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analyse-Details -->
+        <div id="analysisDetails" style="display: none;">
+            <button id="backToHistoryBtn" class="btn btn-secondary" style="margin-bottom: 20px;">
+                ← Zurück zur Historie
+            </button>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 id="detailsTitle">Analyse-Details</h2>
+                </div>
+                <div class="card-body">
+                    <div class="loader-container" id="detailsLoader">
+                        <div class="loader"></div>
+                        <p>Details werden geladen...</p>
+                    </div>
+
+                    <div id="detailsContent" style="display: none;">
+                        <div id="detailsDate" style="color: var(--text-color-secondary); margin-bottom: 20px;"></div>
+
+                        <!-- Scores -->
+                        <div style="display: flex; justify-content: space-around; flex-wrap: wrap; margin-bottom: 30px;">
+                            <div id="detailsScores"></div>
+                        </div>
+
+                        <!-- SEO-Details -->
+                        <div class="detail-section" style="margin-bottom: 30px;">
+                            <h3 style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color);">SEO-Details</h3>
+                            <div class="grid" id="seoDetails"></div>
+                        </div>
+
+                        <!-- Performance-Details -->
+                        <div class="detail-section" style="margin-bottom: 30px;">
+                            <h3 style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color);">Performance-Details</h3>
+                            <div class="grid" id="performanceDetails"></div>
+                        </div>
+
+                        <!-- Sicherheits-Details -->
+                        <div class="detail-section" style="margin-bottom: 30px;">
+                            <h3 style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color);">Sicherheits-Details</h3>
+                            <div class="grid" id="securityDetails"></div>
+                        </div>
+
+                        <!-- Inhalts-Details -->
+                        <div class="detail-section" style="margin-bottom: 30px;">
+                            <h3 style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color);">Inhalts-Details</h3>
+                            <div class="grid" id="contentDetails"></div>
+                        </div>
+
+                        <!-- Aktionen -->
+                        <div style="text-align: center; margin-top: 30px;">
+                            <button id="downloadDetailReportBtn" class="btn">PDF-Bericht herunterladen</button>
+                            <button id="scheduleAnalysisBtn" class="btn btn-secondary" style="margin-left: 10px;">Regelmäßige Analyse planen</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="container footer-content">
+        <div class="footer-text">
+            &copy; 2024 Saraci Design. Alle Rechte vorbehalten.
+        </div>
+        <div class="footer-links">
+            <a href="/">Analyse-Tool</a>
+            <a href="/dashboard.html">Dashboard</a>
+            <a href="/schedules.html">Zeitpläne</a>
+            <a href="https://saraci-design.de" target="_blank">Saraci Design</a>
+        </div>
+    </div>
+</footer>
+
+<script src="js/utils.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // DOM-Elemente
+        const websitesList = document.getElementById('websitesList');
+        const websiteHistory = document.getElementById('websiteHistory');
+        const analysisDetails = document.getElementById('analysisDetails');
+
+        const websitesGrid = document.getElementById('websitesGrid');
+        const websitesLoader = document.getElementById('websitesLoader');
+
+        const historyTitle = document.getElementById('historyTitle');
+        const historyContent = document.getElementById('historyContent');
+        const historyLoader = document.getElementById('historyLoader');
+        const analysesTable = document.getElementById('analysesTable');
+
+        const detailsTitle = document.getElementById('detailsTitle');
+        const detailsContent = document.getElementById('detailsContent');
+        const detailsLoader = document.getElementById('detailsLoader');
+        const detailsDate = document.getElementById('detailsDate');
+        const detailsScores = document.getElementById('detailsScores');
+
+        const seoDetails = document.getElementById('seoDetails');
+        const performanceDetails = document.getElementById('performanceDetails');
+        const securityDetails = document.getElementById('securityDetails');
+        const contentDetails = document.getElementById('contentDetails');
+
+        const backToListBtn = document.getElementById('backToListBtn');
+        const backToHistoryBtn = document.getElementById('backToHistoryBtn');
+        const downloadDetailReportBtn = document.getElementById('downloadDetailReportBtn');
+        const scheduleAnalysisBtn = document.getElementById('scheduleAnalysisBtn');
+
+        // Variablen für die aktuelle Auswahl
+        let currentUrl = null;
+        let currentWebsiteId = null;
+        let currentAnalysisId = null;
+        let historyChart = null;
+
+        // Event-Listener für die Zurück-Buttons
+        backToListBtn.addEventListener('click', showWebsitesList);
+        backToHistoryBtn.addEventListener('click', () => showWebsiteHistory(currentUrl));
+
+        // URL-Parameter überprüfen (für direkte Links)
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlParam = urlParams.get('url');
+        const analysisIdParam = urlParams.get('analysisId');
+
+        if (urlParam) {
+            currentUrl = decodeURIComponent(urlParam);
+            showWebsiteHistory(currentUrl);
+
+            if (analysisIdParam) {
+                currentAnalysisId = analysisIdParam;
+                showAnalysisDetails(currentAnalysisId);
+            }
+        } else {
+            loadWebsites();
+        }
+
+        // Lade alle Websites
+        async function loadWebsites() {
+            websitesLoader.style.display = 'block';
+            websitesGrid.innerHTML = '';
+
+            try {
+                const websites = await apiRequest('/websites');
+
+                if (websites.length === 0) {
+                    websitesGrid.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 30px;">
+                            <p>Noch keine Websites analysiert.</p>
+                            <a href="/" class="btn" style="margin-top: 15px;">Erste Analyse starten</a>
+                        </div>
+                    `;
+                } else {
+                    displayWebsites(websites);
+                }
+
+                websitesLoader.style.display = 'none';
+            } catch (error) {
+                showAlert(error.message || 'Fehler beim Laden der Websites', 'error');
+                websitesLoader.style.display = 'none';
+            }
+        }
+
+        // Websites anzeigen
+        function displayWebsites(websites) {
+            websites.forEach(website => {
+                const websiteItem = document.createElement('div');
+                websiteItem.className = 'grid-item';
+                websiteItem.setAttribute('data-url', website.url);
+
+                websiteItem.innerHTML = `
+                    <h3 style="margin-bottom: 15px; word-break: break-all;">${truncateUrl(website.url)}</h3>
+                    <p><strong>Erste Analyse:</strong> ${formatDate(website.firstAnalysisDate)}</p>
+                    <p><strong>Letzte Analyse:</strong> ${formatDate(website.lastAnalysisDate)}</p>
+                    <p><strong>Anzahl Analysen:</strong> ${website.analysisResults.length}</p>
+                    ${createLatestScoresHTML(website)}
+                `;
+
+                websiteItem.addEventListener('click', () => {
+                    showWebsiteHistory(website.url);
+                });
+
+                websitesGrid.appendChild(websiteItem);
+            });
+        }
+
+        // Zeigt die letzten Scores für eine Website in der Übersicht an
+        function createLatestScoresHTML(website) {
+            // Suche das neueste Analyseergebnis
+            const latestResult = website.analysisResults[0]; // Annahme: Die neuesten Ergebnisse stehen zuerst
+
+            if (!latestResult) {
+                return '<p>Keine Analyseergebnisse verfügbar</p>';
+            }
+
+            const seoScore = latestResult.seoResult?.score || 'N/A';
+            const perfScore = latestResult.performanceResult?.lighthouseScore || 'N/A';
+            const secScore = latestResult.securityResult?.securityHeadersScore || 'N/A';
+
+            return `
+                <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+                    <div style="text-align: center;">
+                        <div class="badge badge-${getScoreClass(seoScore)}">SEO</div>
+                        <div style="font-size: 1.2rem; font-weight: 700; margin-top: 5px;">${seoScore}</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div class="badge badge-${getScoreClass(perfScore)}">PERF</div>
+                        <div style="font-size: 1.2rem; font-weight: 700; margin-top: 5px;">${perfScore}</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div class="badge badge-${getScoreClass(secScore)}">SEC</div>
+                        <div style="font-size: 1.2rem; font-weight: 700; margin-top: 5px;">${secScore}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Zeigt die Historie einer Website an
+        async function showWebsiteHistory(url) {
+            // Ansicht umschalten
+            websitesList.style.display = 'none';
+            websiteHistory.style.display = 'block';
+            analysisDetails.style.display = 'none';
+
+            // URL für spätere Verwendung speichern
+            currentUrl = url;
+
+            // Titel setzen
+            historyTitle.textContent = `Website-Historie: ${truncateUrl(url)}`;
+
+            // Ladeindikator anzeigen
+            historyLoader.style.display = 'block';
+            historyContent.style.display = 'none';
+
+            try {
+                // Historie abrufen
+                const history = await apiRequest(`/websites/url/${encodeURIComponent(url)}/history`);
+
+                // Website-ID speichern
+                currentWebsiteId = history.website.id;
+
+                // Tabelle mit Analyseergebnissen füllen
+                populateAnalysesTable(history.analyses);
+
+                // Diagramm erstellen
+                createHistoryChart(history.analyses);
+
+                // Inhalt anzeigen
+                historyLoader.style.display = 'none';
+                historyContent.style.display = 'block';
+            } catch (error) {
+                showAlert(error.message || 'Fehler beim Laden der Historie', 'error');
+                historyLoader.style.display = 'none';
+            }
+        }
+
+        // Analysen-Tabelle mit Daten füllen
+        function populateAnalysesTable(analyses) {
+            const tbody = analysesTable.querySelector('tbody');
+            tbody.innerHTML = '';
+
+            analyses.forEach(analysis => {
+                const row = document.createElement('tr');
+
+                // Scores abrufen
+                const seoScore = analysis.seoResult?.score || 'N/A';
+                const perfScore = analysis.performanceResult?.lighthouseScore || 'N/A';
+                const secScore = analysis.securityResult?.securityHeadersScore || 'N/A';
+
+                row.innerHTML = `
+                    <td>${formatDate(analysis.analysisDate)}</td>
+                    <td><span class="badge badge-${getScoreClass(seoScore)}">${seoScore}</span></td>
+                    <td><span class="badge badge-${getScoreClass(perfScore)}">${perfScore}</span></td>
+                    <td><span class="badge badge-${getScoreClass(secScore)}">${secScore}</span></td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm view-details" data-id="${analysis.id}">Details</button>
+                    </td>
+                `;
+
+                row.querySelector('.view-details').addEventListener('click', () => {
+                    showAnalysisDetails(analysis.id);
+                });
+
+                tbody.appendChild(row);
+            });
+        }
+
+        // Diagramm mit historischen Daten erstellen
+        function createHistoryChart(analyses) {
+            // Bestehenden Chart löschen, falls vorhanden
+            if (historyChart) {
+                historyChart.destroy();
+            }
+
+            // Daten vorbereiten (Reihenfolge umkehren, damit älteste Daten zuerst erscheinen)
+            const chartData = analyses.slice().reverse();
+
+            const labels = chartData.map(a => formatDate(a.analysisDate));
+            const seoScores = chartData.map(a => a.seoResult?.score || null);
+            const perfScores = chartData.map(a => a.performanceResult?.lighthouseScore || null);
+            const secScores = chartData.map(a => a.securityResult?.securityHeadersScore || null);
+
+            // Chart erstellen
+            const ctx = document.getElementById('historyChart').getContext('2d');
+            historyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'SEO',
+                            data: seoScores,
+                            borderColor: '#00d26a',
+                            backgroundColor: 'rgba(0, 210, 106, 0.1)',
+                            tension: 0.3,
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Performance',
+                            data: perfScores,
+                            borderColor: '#ffbb00',
+                            backgroundColor: 'rgba(255, 187, 0, 0.1)',
+                            tension: 0.3,
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Sicherheit',
+                            data: secScores,
+                            borderColor: '#e81818',
+                            backgroundColor: 'rgba(232, 24, 24, 0.1)',
+                            tension: 0.3,
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Zeigt die Details einer Analyse an
+        async function showAnalysisDetails(analysisId) {
+            // Ansicht umschalten
+            websitesList.style.display = 'none';
+            websiteHistory.style.display = 'none';
+            analysisDetails.style.display = 'block';
+
+            // Analyse-ID für spätere Verwendung speichern
+            currentAnalysisId = analysisId;
+
+            // Ladeindikator anzeigen
+            detailsLoader.style.display = 'block';
+            detailsContent.style.display = 'none';
+
+            try {
+                // Details abrufen
+                const details = await apiRequest(`/analysis/${analysisId}`);
+
+                // Titel setzen
+                detailsTitle.textContent = `Analyse-Details: ${truncateUrl(details.url)}`;
+
+                // Datum anzeigen
+                detailsDate.textContent = `Analyse vom ${formatDate(details.analysisDate)}`;
+
+                // Scores anzeigen
+                displayScores(details);
+
+                // Details anzeigen
+                displaySeoDetails(details.seoResult);
+                displayPerformanceDetails(details.performanceResult);
+                displaySecurityDetails(details.securityResult);
+                displayContentDetails(details.contentResult);
+
+                // Download-Button konfigurieren
+                if (details.pdfReportPath) {
+                    downloadDetailReportBtn.style.display = 'inline-block';
+                    downloadDetailReportBtn.onclick = () => {
+                        window.location.href = `/api/analysis/${analysisId}/report`;
+                    };
+                } else {
+                    downloadDetailReportBtn.style.display = 'none';
+                }
+
+                // Zeitplan-Button konfigurieren
+                scheduleAnalysisBtn.onclick = () => {
+                    window.location.href = `/schedules.html?websiteId=${currentWebsiteId}`;
+                };
+
+                // Inhalt anzeigen
+                detailsLoader.style.display = 'none';
+                detailsContent.style.display = 'block';
+            } catch (error) {
+                showAlert(error.message || 'Fehler beim Laden der Details', 'error');
+                detailsLoader.style.display = 'none';
+            }
+        }
+
+        // Scores anzeigen
+        function displayScores(details) {
+            detailsScores.innerHTML = '';
+
+            // SEO-Score
+            const seoScore = details.seoResult?.score || 'N/A';
+            const seoElement = createScoreElement(seoScore, 'SEO');
+            detailsScores.appendChild(seoElement);
+
+            // Performance-Score
+            const perfScore = details.performanceResult?.lighthouseScore || 'N/A';
+            const perfElement = createScoreElement(perfScore, 'Performance');
+            detailsScores.appendChild(perfElement);
+
+            // Sicherheits-Score
+            const secScore = details.securityResult?.securityHeadersScore || 'N/A';
+            const secElement = createScoreElement(secScore, 'Sicherheit');
+            detailsScores.appendChild(secElement);
+        }
+
+        // SEO-Details anzeigen
+        function displaySeoDetails(seoResult) {
+            seoDetails.innerHTML = '';
+
+            if (!seoResult) {
+                seoDetails.innerHTML = '<div style="grid-column: 1 / -1;">Keine SEO-Daten verfügbar</div>';
+                return;
+            }
+
+            // Detail-Items erstellen
+            createDetailItem(seoDetails, 'Titel-Länge', `${seoResult.titleLength} Zeichen`);
+            createDetailItem(seoDetails, 'Beschreibungs-Länge', `${seoResult.descriptionLength} Zeichen`);
+            createDetailItem(seoDetails, 'H1-Anzahl', seoResult.h1Count);
+            createDetailItem(seoDetails, 'H2-Anzahl', seoResult.h2Count);
+            createDetailItem(seoDetails, 'Bilder mit Alt-Text', `${seoResult.imagesWithAlt} / ${seoResult.imagesTotal}`);
+            createDetailItem(seoDetails, 'Alt-Text Abdeckung', `${Math.round(seoResult.altImagePercentage)}%`);
+            createDetailItem(seoDetails, 'Interne Links', seoResult.internalLinks);
+            createDetailItem(seoDetails, 'Externe Links', seoResult.externalLinks);
+        }
+
+        // Performance-Details anzeigen
+        function displayPerformanceDetails(perfResult) {
+            performanceDetails.innerHTML = '';
+
+            if (!perfResult) {
+                performanceDetails.innerHTML = '<div style="grid-column: 1 / -1;">Keine Performance-Daten verfügbar</div>';
+                return;
+            }
+
+            // Detail-Items erstellen
+            createDetailItem(performanceDetails, 'First Contentful Paint', perfResult.firstContentfulPaint);
+            createDetailItem(performanceDetails, 'Largest Contentful Paint', perfResult.largestContentfulPaint);
+            createDetailItem(performanceDetails, 'Time to Interactive', perfResult.timeToInteractive);
+            createDetailItem(performanceDetails, 'Total Blocking Time', perfResult.totalBlockingTime);
+            createDetailItem(performanceDetails, 'Cumulative Layout Shift', perfResult.cumulativeLayoutShift);
+            createDetailItem(performanceDetails, 'Ladezeit', `${perfResult.loadTime} ms`);
+        }
+
+        // Sicherheits-Details anzeigen
+        function displaySecurityDetails(secResult) {
+            securityDetails.innerHTML = '';
+
+            if (!secResult) {
+                securityDetails.innerHTML = '<div style="grid-column: 1 / -1;">Keine Sicherheits-Daten verfügbar</div>';
+                return;
+            }
+
+            // Detail-Items erstellen
+            createDetailItem(securityDetails, 'HTTPS', secResult.httpsEnabled ? 'Ja' : 'Nein');
+            createDetailItem(securityDetails, 'Sicherheits-Header Score', `${secResult.securityHeadersScore}%`);
+            createDetailItem(securityDetails, 'Cookies-Sicherheit Score', `${secResult.cookiesSecurityScore}%`);
+
+            // Security Headers als eigenes Detail-Item
+            if (secResult.securityHeaders) {
+                try {
+                    const headers = JSON.parse(secResult.securityHeaders);
+
+                    // Container für Headers erstellen
+                    const headersContainer = document.createElement('div');
+                    headersContainer.className = 'grid-item';
+                    headersContainer.style.gridColumn = '1 / -1';
+
+                    // Überschrift
+                    const headersTitle = document.createElement('h4');
+                    headersTitle.textContent = 'Implementierte Sicherheits-Header';
+                    headersTitle.style.marginBottom = '10px';
+                    headersContainer.appendChild(headersTitle);
+
+                    // Header-Liste
+                    const headersList = document.createElement('div');
+
+                    for (const [header, value] of Object.entries(headers)) {
+                        const headerItem = document.createElement('div');
+                        headerItem.style.marginBottom = '5px';
+
+                        const headerName = document.createElement('strong');
+                        headerName.textContent = header + ': ';
+
+                        const headerValue = document.createElement('span');
+                        headerValue.textContent = value || 'Nicht implementiert';
+                        headerValue.style.color = value ? 'var(--text-color)' : 'var(--error-color)';
+
+                        headerItem.appendChild(headerName);
+                        headerItem.appendChild(headerValue);
+                        headersList.appendChild(headerItem);
+                    }
+
+                    headersContainer.appendChild(headersList);
+                    securityDetails.appendChild(headersContainer);
+                } catch (e) {
+                    console.error('Fehler beim Parsen der Security-Headers:', e);
+                }
+            }
+        }
+
+        // Inhalts-Details anzeigen
+        function displayContentDetails(contentResult) {
+            contentDetails.innerHTML = '';
+
+            if (!contentResult) {
+                contentDetails.innerHTML = '<div style="grid-column: 1 / -1;">Keine Inhalts-Daten verfügbar</div>';
+                return;
+            }
+
+            // Detail-Items erstellen
+            createDetailItem(contentDetails, 'Wortanzahl', contentResult.wordCount);
+            createDetailItem(contentDetails, 'Zeichenanzahl', contentResult.characterCount);
+            createDetailItem(contentDetails, 'Durchschnittliche Wortlänge', `${contentResult.averageWordLength.toFixed(1)} Zeichen`);
+            createDetailItem(contentDetails, 'Absatzanzahl', contentResult.paragraphCount);
+            createDetailItem(contentDetails, 'Bildanzahl', contentResult.imageCount);
+            createDetailItem(contentDetails, 'Videoanzahl', contentResult.videoCount);
+            createDetailItem(contentDetails, 'Listenanzahl', contentResult.listCount);
+            createDetailItem(contentDetails, 'Tabellenanzahl', contentResult.tableCount);
+        }
+
+        // Hilfsfunktion zum Erstellen eines Detail-Items
+        function createDetailItem(container, label, value) {
+            const item = document.createElement('div');
+            item.className = 'grid-item';
+
+            const labelElement = document.createElement('div');
+            labelElement.className = 'detail-label';
+            labelElement.textContent = label;
+            labelElement.style.fontSize = '0.85rem';
+            labelElement.style.fontWeight = '500';
+            labelElement.style.marginBottom = '5px';
+            labelElement.style.color = 'var(--text-color-secondary)';
+
+            const valueElement = document.createElement('div');
+            valueElement.className = 'detail-value';
+            valueElement.textContent = value;
+            valueElement.style.fontSize = '1.2rem';
+            valueElement.style.fontWeight = '600';
+
+            item.appendChild(labelElement);
+            item.appendChild(valueElement);
+            container.appendChild(item);
+        }
+
+        // Hilfsfunktion zum Erstellen eines Score-Elements
+        function createScoreElement(score, label) {
+            const container = document.createElement('div');
+            container.className = 'score-container';
+            container.style.textAlign = 'center';
+            container.style.padding = '20px';
+            container.style.margin = '0 10px';
+            container.style.flexBasis = '150px';
+            container.style.borderRadius = '5px';
+            container.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+
+            const labelElement = document.createElement('div');
+            labelElement.className = 'score-label';
+            labelElement.textContent = label;
+            labelElement.style.fontSize = '0.9rem';
+            labelElement.style.marginBottom = '10px';
+            labelElement.style.color = 'var(--text-color-secondary)';
+
+            const valueElement = document.createElement('div');
+            valueElement.className = 'score-value';
+            valueElement.textContent = score;
+            valueElement.style.fontSize = '2.5rem';
+            valueElement.style.fontWeight = '700';
+            valueElement.style.color = getScoreColorFromClass(getScoreClass(score));
+
+            container.appendChild(labelElement);
+            container.appendChild(valueElement);
+
+            return container;
+        }
+
+        // Score-Klasse basierend auf dem Wert ermitteln
+        function getScoreClass(score) {
+            if (score === 'N/A' || isNaN(score)) return 'neutral';
+            if (score >= 70) return 'good';
+            if (score >= 50) return 'average';
+            return 'poor';
+        }
+
+        // Score-Farbe basierend auf der Klasse ermitteln
+        function getScoreColorFromClass(scoreClass) {
+            switch (scoreClass) {
+                case 'good': return 'var(--success-color)';
+                case 'average': return 'var(--warning-color)';
+                case 'poor': return 'var(--error-color)';
+                default: return 'var(--text-color)';
+            }
+        }
+
+        // Zeigt die Website-Liste an
+        function showWebsitesList() {
+            currentUrl = null;
+            currentWebsiteId = null;
+            currentAnalysisId = null;
+
+            websitesList.style.display = 'block';
+            websiteHistory.style.display = 'none';
+            analysisDetails.style.display = 'none';
+
+            // URL-Parameter entfernen
+            window.history.pushState({}, '', '/dashboard.html');
+
+            // Chart zerstören, falls vorhanden
+            if (historyChart) {
+                historyChart.destroy();
+                historyChart = null;
+            }
+        }
+
+        // API-Anfrage senden
+        async function apiRequest(endpoint) {
+            try {
+                const response = await fetch(`/api${endpoint}`);
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Ein Fehler ist aufgetreten');
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('API-Anfrage fehlgeschlagen:', error);
+                throw error;
+            }
+        }
+
+        // Alert anzeigen
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+
+            alertContainer.appendChild(alert);
+
+            // Nach 5 Sekunden automatisch ausblenden
+            setTimeout(() => {
+                alert.style.opacity = '0';
+                setTimeout(() => {
+                    alert.remove();
+                }, 300);
+            }, 5000);
+        }
+
+        // URL für die Anzeige kürzen
+        function truncateUrl(url, maxLength = 30) {
+            if (!url) return '';
+
+            // HTTP/HTTPS entfernen
+            let cleanUrl = url.replace(/^https?:\/\//, '');
+
+            // Wenn URL zu lang ist, kürzen
+            if (cleanUrl.length > maxLength) {
+                return cleanUrl.substring(0, maxLength - 3) + '...';
+            }
+
+            return cleanUrl;
+        }
+
+        // Datum formatieren
+        function formatDate(dateString) {
+            if (!dateString) return '';
+
+            const date = new Date(dateString);
+
+            return date.toLocaleString('de-DE', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+    // AI-Empfehlungen laden (falls verfügbar)
+            async function loadAIRecommendations(analysisId) {
+                try {
+                    const recommendationsCard = document.getElementById('aiRecommendationsCard');
+                    if (!recommendationsCard) return; // Falls das Element nicht existiert
+
+                    const recommendationsContent = document.getElementById('aiRecommendationsContent');
+                    const recommendationsLoader = document.getElementById('aiRecommendationsLoader');
+
+                    // Anzeigen und Ladeindikator aktivieren
+                    recommendationsCard.style.display = 'block';
+                    recommendationsLoader.style.display = 'block';
+                    recommendationsContent.style.display = 'none';
+
+                    // Empfehlungen abrufen
+                    const data = await apiRequest(`/analysis/${analysisId}/ai-recommendations`);
+
+                    if (!data.recommendations || data.recommendations.length === 0) {
+                        recommendationsContent.innerHTML = '<p>Keine KI-Empfehlungen verfügbar.</p>';
+                    } else {
+                        // Empfehlungen anzeigen
+                        displayAIRecommendations(data.recommendations);
+                    }
+
+                    // Ladeindikator ausblenden und Inhalt anzeigen
+                    recommendationsLoader.style.display = 'none';
+                    recommendationsContent.style.display = 'block';
+                } catch (error) {
+                    console.error('Fehler beim Laden der KI-Empfehlungen:', error);
+
+                    // In der UI auf den Fehler hinweisen, falls die Elemente existieren
+                    const recommendationsError = document.getElementById('aiRecommendationsError');
+                    const recommendationsLoader = document.getElementById('aiRecommendationsLoader');
+
+                    if (recommendationsError && recommendationsLoader) {
+                        recommendationsLoader.style.display = 'none';
+                        recommendationsError.style.display = 'block';
+                        recommendationsError.textContent = `Fehler: ${error.message || 'Unbekannter Fehler'}`;
+                    }
+                }
+            }
+
+            // KI-Empfehlungen anzeigen
+            function displayAIRecommendations(recommendations) {
+                const container = document.getElementById('aiRecommendationsContent');
+                if (!container) return;
+
+                container.innerHTML = '';
+
+                if (recommendations.generatedAt) {
+                    // Generierungsdatum anzeigen
+                    const generatedDate = new Date(recommendations.generatedAt);
+                    const dateElement = document.createElement('p');
+                    dateElement.className = 'text-muted small mb-4';
+                    dateElement.textContent = `Generiert am: ${formatDate(recommendations.generatedAt)}`;
+                    container.appendChild(dateElement);
+                }
+
+                // Empfehlungsliste erstellen
+                const recommendationsList = document.createElement('div');
+                recommendationsList.className = 'recommendations-list';
+
+                recommendations.recommendations.forEach((rec, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'recommendation-card mb-3';
+                    card.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                    card.style.borderRadius = '5px';
+                    card.style.padding = '15px';
+                    card.style.marginBottom = '15px';
+
+                    // Header mit Titel und Badges
+                    const header = document.createElement('div');
+                    header.className = 'recommendation-header';
+                    header.style.display = 'flex';
+                    header.style.justifyContent = 'space-between';
+                    header.style.alignItems = 'center';
+                    header.style.marginBottom = '10px';
+
+                    // Titel mit Nummer
+                    const title = document.createElement('h4');
+                    title.style.margin = '0';
+                    title.style.fontSize = '1.1rem';
+                    title.style.fontWeight = '600';
+                    title.textContent = `${index + 1}. ${rec.title}`;
+
+                    header.appendChild(title);
+
+                    // Badges-Container
+                    const badges = document.createElement('div');
+                    badges.style.display = 'flex';
+                    badges.style.gap = '5px';
+
+                    // Kategorie-Badge
+                    if (rec.category) {
+                        const categoryBadge = document.createElement('span');
+                        categoryBadge.className = `badge badge-${getCategoryBadgeClass(rec.category)}`;
+                        categoryBadge.textContent = rec.category;
+                        badges.appendChild(categoryBadge);
+                    }
+
+                    // Priorität-Badge
+                    if (rec.priority) {
+                        const priorityBadge = document.createElement('span');
+                        priorityBadge.className = `badge badge-${getPriorityBadgeClass(rec.priority)}`;
+                        priorityBadge.textContent = rec.priority;
+                        badges.appendChild(priorityBadge);
+                    }
+
+                    header.appendChild(badges);
+                    card.appendChild(header);
+
+                    // Beschreibung
+                    if (rec.description) {
+                        const descriptionTitle = document.createElement('h5');
+                        descriptionTitle.textContent = 'Beschreibung:';
+                        descriptionTitle.style.fontSize = '0.9rem';
+                        descriptionTitle.style.marginTop = '15px';
+                        descriptionTitle.style.marginBottom = '5px';
+                        card.appendChild(descriptionTitle);
+
+                        const description = document.createElement('p');
+                        description.style.margin = '0 0 15px 0';
+                        description.textContent = rec.description;
+                        card.appendChild(description);
+                    }
+
+                    // Vorteile
+                    if (rec.benefits) {
+                        const benefitsTitle = document.createElement('h5');
+                        benefitsTitle.textContent = 'Vorteile:';
+                        benefitsTitle.style.fontSize = '0.9rem';
+                        benefitsTitle.style.marginTop = '15px';
+                        benefitsTitle.style.marginBottom = '5px';
+                        card.appendChild(benefitsTitle);
+
+                        const benefits = document.createElement('p');
+                        benefits.style.margin = '0';
+                        benefits.textContent = rec.benefits;
+                        card.appendChild(benefits);
+                    }
+
+                    recommendationsList.appendChild(card);
+                });
+
+                container.appendChild(recommendationsList);
+
+                // Event-Listener für Aktualisieren-Button hinzufügen
+                const refreshButton = document.getElementById('refreshAiRecommendationsBtn');
+                if (refreshButton) {
+                    refreshButton.addEventListener('click', () => {
+                        if (currentAnalysisId) {
+                            loadAIRecommendations(currentAnalysisId);
+                        }
+                    });
+                }
+            }
+
+            // Hilfsfunktion: CSS-Klasse für Kategorie-Badge bestimmen
+            function getCategoryBadgeClass(category) {
+                if (!category) return 'secondary';
+
+                switch (category.toLowerCase()) {
+                    case 'seo': return 'primary';
+                    case 'performance': return 'warning';
+                    case 'inhalt': return 'info';
+                    case 'sicherheit': return 'success';
+                    case 'mobile': return 'secondary';
+                    default: return 'dark';
+                }
+            }
+
+            // Hilfsfunktion: CSS-Klasse für Priorität-Badge bestimmen
+            function getPriorityBadgeClass(priority) {
+                if (!priority) return 'secondary';
+
+                switch (priority.toLowerCase()) {
+                    case 'hoch': return 'danger';
+                    case 'mittel': return 'warning';
+                    case 'normal': return 'secondary';
+                    default: return 'secondary';
+                }
+            }
+        });
+</script>
+</body>
+</html>
