@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zeitpläne - Website Analyzer</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+</head>
+<body>
+<header>
+  <div class="container header-content">
+    <div class="logo">
+      <img src="images/logo.png" alt="Saraci Design Logo">
+      <div class="logo-text">
+        <h1>Website Analyzer</h1>
+        <p>Zeitplanung</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="container">
+    <div class="nav-container">
+      <a href="/" class="nav-link">Analyse-Tool</a>
+      <a href="/dashboard.html" class="nav-link">Dashboard</a>
+      <a href="/schedules.html" class="nav-link active">Zeitpläne</a>
+    </div>
+  </div>
+</nav>
+
+<div class="main-content">
+  <div class="container">
+    <div id="alertContainer"></div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Website-Analyse planen</h2>
+      </div>
+      <div class="card-body">
+        <form id="scheduleForm">
+          <div class="form-group">
+            <label for="websiteSelect">Website</label>
+            <select id="websiteSelect" name="websiteId" required>
+              <option value="">-- Website auswählen --</option>
+              <!-- Websites werden hier per JavaScript eingefügt -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="cronExpression">Häufigkeit</label>
+            <select id="cronExpression" name="cronExpression" required>
+              <option value="">-- Häufigkeit auswählen --</option>
+              <option value="0 * * * *">Stündlich</option>
+              <option value="0 0 * * *">Täglich (Mitternacht)</option>
+              <option value="0 8 * * *">Täglich (8 Uhr)</option>
+              <option value="0 0 * * 1">Wöchentlich (Montag, Mitternacht)</option>
+              <option value="0 0 1 * *">Monatlich (1. Tag, Mitternacht)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="recipients">E-Mail-Empfänger</label>
+            <input type="text" id="recipients" name="recipients" placeholder="email@example.com, email2@example.com" required>
+            <span class="input-hint">Mehrere E-Mail-Adressen durch Komma trennen</span>
+          </div>
+
+          <div class="form-group">
+            <label for="reportType">Berichtstyp</label>
+            <select id="reportType" name="reportType" required>
+              <option value="full">Vollständiger Bericht</option>
+              <option value="seo">Nur SEO</option>
+              <option value="performance">Nur Performance</option>
+              <option value="security">Nur Sicherheit</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-block">Zeitplan erstellen</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="loader-container" id="loader" style="display: none;">
+      <div class="loader"></div>
+      <p>Daten werden geladen...</p>
+    </div>
+
+    <div class="card" id="schedulesCard" style="display: none; margin-top: 30px;">
+      <div class="card-header">
+        <h2>Aktive Zeitpläne</h2>
+      </div>
+      <div class="card-body">
+        <div class="table-container">
+          <table id="schedulesTable">
+            <thead>
+            <tr>
+              <th>Website</th>
+              <th>Häufigkeit</th>
+              <th>Empfänger</th>
+              <th>Berichtstyp</th>
+              <th>Nächste Ausführung</th>
+              <th>Aktionen</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Zeitpläne werden hier per JavaScript eingefügt -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="container footer-content">
+    <div class="footer-text">
+      &copy; 2025 Saraci Design. Alle Rechte vorbehalten.
+    </div>
+    <div class="footer-links">
+      <a href="/">Analyse-Tool</a>
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/schedules.html">Zeitpläne</a>
+      <a href="https://saraci-design.de" target="_blank">Saraci Design</a>
+    </div>
+  </div>
+</footer>
+
+<script src="js/utils.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      // DOM-Elemente
+      const scheduleForm = document.getElementById('scheduleForm');
+      const websiteSelect = document.getElementById('websiteSelect');
+      const loader = document.getElementById('loader');
+      const schedulesCard = document.getElementById('schedulesCard');
+      const schedulesTable = document.getElementById('schedulesTable').querySelector('tbody');
+
+      // URLs aus den Query-Parametern abrufen
+      const urlParams = new URLSearchParams(window.location.search);
+      const websiteId = urlParams.get('websiteId');
+
+      // Websites laden
+      loadWebsites();
+
+      // Zeitpläne laden
+      loadSchedules();
+
+      // Event-Listener für das Formular
+      scheduleForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+
+          // Formulardaten sammeln
+          const formData = {
+              websiteId: parseInt(websiteSelect.value),
+              cronExpression: document.getElementById('cronExpression').value,
+              recipients: document.getElementById('recipients').value,
+              reportType: document.getElementById('reportType').value
+          };
+
+          try {
+              // Loader anzeigen
+              loader.style.display = 'block';
+
+              // API-Anfrage senden
+              const response = await apiRequest('/schedules', 'POST', formData);
+
+              // Erfolg anzeigen
+              showAlert('Zeitplan erfolgreich erstellt', 'success');
+
+              // Formular zurücksetzen
+              scheduleForm.reset();
+
+              // Zeitpläne neu laden
+              loadSchedules();
+          } catch (error) {
+              showAlert(error.message || 'Fehler beim Erstellen des Zeitplans', 'error');
+          } finally {
+              // Loader ausblenden
+              loader.style.display = 'none';
+          }
+      });
+
+      // Websites laden
+      async function loadWebsites() {
+          try {
+              // API-Anfrage senden
+              const websites = await apiRequest('/websites');
+
+              // Website-Optionen hinzufügen
+              websites.forEach(website => {
+                  const option = document.createElement('option');
+                  option.value = website.id;
+                  option.textContent = truncateUrl(website.url);
+
+                  // Wenn eine Website-ID als Parameter übergeben wurde, diese auswählen
+                  if (websiteId && website.id.toString() === websiteId) {
+                      option.selected = true;
+                  }
+
+                  websiteSelect.appendChild(option);
+              });
+          } catch (error) {
+              showAlert(error.message || 'Fehler beim Laden der Websites', 'error');
+          }
+      }
+
+      // Zeitpläne laden
+      async function loadSchedules() {
+          try {
+              // Loader anzeigen
+              loader.style.display = 'block';
+              schedulesCard.style.display = 'none';
+
+              // API-Anfrage senden
+              const schedules = await apiRequest('/schedules');
+
+              // Tabelle leeren
+              schedulesTable.innerHTML = '';
+
+              if (schedules.length === 0) {
+                  // Keine Zeitpläne vorhanden
+                  const row = document.createElement('tr');
+                  row.innerHTML = '<td colspan="6" style="text-align: center;">Keine Zeitpläne vorhanden</td>';
+                  schedulesTable.appendChild(row);
+              } else {
+                  // Zeitpläne einfügen
+                  schedules.forEach(schedule => {
+                      addScheduleToTable(schedule);
+                  });
+              }
+
+              // Zeitplan-Tabelle anzeigen
+              schedulesCard.style.display = 'block';
+          } catch (error) {
+              showAlert(error.message || 'Fehler beim Laden der Zeitpläne', 'error');
+          } finally {
+              // Loader ausblenden
+              loader.style.display = 'none';
+          }
+      }
+
+      // Zeitplan zur Tabelle hinzufügen
+      function addScheduleToTable(schedule) {
+          // Website-URL suchen
+          const websiteOption = websiteSelect.querySelector(`option[value="${schedule.websiteId}"]`);
+          const websiteUrl = websiteOption ? websiteOption.textContent : `Website ID: ${schedule.websiteId}`;
+
+          // Häufigkeit formatieren
+          const frequency = formatCronExpression(schedule.cronExpression);
+
+          // Nächste Ausführung formatieren
+          const nextRun = schedule.nextRun ? formatDate(schedule.nextRun) : 'Nicht geplant';
+
+          // Zeile erstellen
+          const row = document.createElement('tr');
+          row.innerHTML = `
+              <td>${websiteUrl}</td>
+              <td>${frequency}</td>
+              <td>${schedule.recipients}</td>
+              <td>${formatReportType(schedule.reportType)}</td>
+              <td>${nextRun}</td>
+              <td>
+                  <button class="btn btn-secondary btn-sm" data-action="execute" data-id="${schedule.id}">Jetzt ausführen</button>
+                  <button class="btn btn-secondary btn-sm" data-action="delete" data-id="${schedule.id}" style="margin-left: 5px;">Löschen</button>
+              </td>
+          `;
+
+          // Event-Listener für die Aktionen
+          row.querySelectorAll('button[data-action]').forEach(button => {
+              button.addEventListener('click', async function() {
+                  const action = this.getAttribute('data-action');
+                  const id = this.getAttribute('data-id');
+
+                  if (action === 'execute') {
+                      await executeSchedule(id);
+                  } else if (action === 'delete') {
+                      await deleteSchedule(id);
+                  }
+              });
+          });
+
+          schedulesTable.appendChild(row);
+      }
+
+      // Zeitplan sofort ausführen
+      async function executeSchedule(id) {
+          try {
+              // Loader anzeigen
+              loader.style.display = 'block';
+
+              // API-Anfrage senden
+              await apiRequest(`/schedules/${id}/execute`, 'POST');
+
+              // Erfolg anzeigen
+              showAlert('Zeitplan wird ausgeführt', 'success');
+          } catch (error) {
+              showAlert(error.message || 'Fehler beim Ausführen des Zeitplans', 'error');
+          } finally {
+              // Loader ausblenden
+              loader.style.display = 'none';
+          }
+      }
+
+      // Zeitplan löschen
+      async function deleteSchedule(id) {
+          if (confirm('Sind Sie sicher, dass Sie diesen Zeitplan löschen möchten?')) {
+              try {
+                  // Loader anzeigen
+                  loader.style.display = 'block';
+
+                  // API-Anfrage senden
+                  await apiRequest(`/schedules/${id}`, 'DELETE');
+
+                  // Erfolg anzeigen
+                  showAlert('Zeitplan erfolgreich gelöscht', 'success');
+
+                  // Zeitpläne neu laden
+                  loadSchedules();
+              } catch (error) {
+                  showAlert(error.message || 'Fehler beim Löschen des Zeitplans', 'error');
+              } finally {
+                  // Loader ausblenden
+                  loader.style.display = 'none';
+              }
+          }
+      }
+
+      // Cron-Ausdruck in lesbaren Text formatieren
+      function formatCronExpression(cronExpression) {
+          switch (cronExpression) {
+              case '0 * * * *': return 'Stündlich';
+              case '0 0 * * *': return 'Täglich (Mitternacht)';
+              case '0 8 * * *': return 'Täglich (8 Uhr)';
+              case '0 0 * * 1': return 'Wöchentlich (Montag)';
+              case '0 0 1 * *': return 'Monatlich (1. Tag)';
+              default: return cronExpression;
+          }
+      }
+
+      // Berichtstyp formatieren
+      function formatReportType(reportType) {
+          switch (reportType) {
+              case 'full': return 'Vollständig';
+              case 'seo': return 'Nur SEO';
+              case 'performance': return 'Nur Performance';
+              case 'security': return 'Nur Sicherheit';
+              default: return reportType;
+          }
+      }
+  });
+</script>
+</body>
+</html>
