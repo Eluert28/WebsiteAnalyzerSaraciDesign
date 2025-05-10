@@ -314,6 +314,9 @@
 
         // Zeigt die Historie einer Website an
         async function showWebsiteHistory(url) {
+            // Debug-Logging
+            console.log(`Zeige Historie für URL: ${url}`);
+
             // Ansicht umschalten
             websitesList.style.display = 'none';
             websiteHistory.style.display = 'block';
@@ -330,8 +333,13 @@
             historyContent.style.display = 'none';
 
             try {
+                // URL korrekt codieren
+                const encodedUrl = encodeURIComponent(url);
+                console.log(`Encoded URL: ${encodedUrl}`);
+
                 // Historie abrufen
-                const history = await apiRequest(`/websites/url/${encodeURIComponent(url)}/history`);
+                const history = await apiRequest(`/websites/url/${encodedUrl}/history`);
+                console.log('Historie erfolgreich abgerufen:', history);
 
                 // Website-ID speichern
                 currentWebsiteId = history.website.id;
@@ -346,6 +354,7 @@
                 historyLoader.style.display = 'none';
                 historyContent.style.display = 'block';
             } catch (error) {
+                console.error('Fehler beim Laden der Historie:', error);
                 showAlert(error.message || 'Fehler beim Laden der Historie', 'error');
                 historyLoader.style.display = 'none';
             }
@@ -476,6 +485,9 @@
 
         // Zeigt die Details einer Analyse an
         async function showAnalysisDetails(analysisId) {
+            // Debug-Logging
+            console.log(`Zeige Details für Analyse-ID: ${analysisId}`);
+
             // Ansicht umschalten
             websitesList.style.display = 'none';
             websiteHistory.style.display = 'none';
@@ -491,6 +503,7 @@
             try {
                 // Details abrufen
                 const details = await apiRequest(`/analysis/${analysisId}`);
+                console.log('Details erfolgreich abgerufen:', details);
 
                 // Titel setzen
                 detailsTitle.textContent = `Analyse-Details: ${truncateUrl(details.url)}`;
@@ -511,7 +524,9 @@
                 if (details.pdfReportPath) {
                     downloadDetailReportBtn.style.display = 'inline-block';
                     downloadDetailReportBtn.onclick = () => {
-                        window.location.href = `/api/analysis/${analysisId}/report`;
+                        // Extrahiere den Dateinamen aus dem Pfad
+                        const filename = details.pdfReportPath.split('/').pop();
+                        window.location.href = `/api/reports/${filename}`;
                     };
                 } else {
                     downloadDetailReportBtn.style.display = 'none';
@@ -526,6 +541,7 @@
                 detailsLoader.style.display = 'none';
                 detailsContent.style.display = 'block';
             } catch (error) {
+                console.error('Fehler beim Laden der Details:', error);
                 showAlert(error.message || 'Fehler beim Laden der Details', 'error');
                 detailsLoader.style.display = 'none';
             }
@@ -696,6 +712,8 @@
             container.className = 'score-container';
             container.style.textAlign = 'center';
             container.style.padding = '20px';
+            container.style.textAlign = 'center';
+            container.style.padding = '20px';
             container.style.margin = '0 10px';
             container.style.flexBasis = '150px';
             container.style.borderRadius = '5px';
@@ -762,11 +780,15 @@
         // API-Anfrage senden
         async function apiRequest(endpoint) {
             try {
+                // Debug-Logging hinzufügen
+                console.log(`Sende API-Anfrage an: ${endpoint}`);
+
                 const response = await fetch(`/api${endpoint}`);
+                console.log(`API-Antwort erhalten. Status: ${response.status}`);
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.message || 'Ein Fehler ist aufgetreten');
+                    throw new Error(errorData.error || 'Ein Fehler ist aufgetreten');
                 }
 
                 return await response.json();
@@ -824,189 +846,190 @@
                 minute: '2-digit'
             });
         }
+    });
+
     // AI-Empfehlungen laden (falls verfügbar)
-            async function loadAIRecommendations(analysisId) {
-                try {
-                    const recommendationsCard = document.getElementById('aiRecommendationsCard');
-                    if (!recommendationsCard) return; // Falls das Element nicht existiert
+    async function loadAIRecommendations(analysisId) {
+        try {
+            const recommendationsCard = document.getElementById('aiRecommendationsCard');
+            if (!recommendationsCard) return; // Falls das Element nicht existiert
 
-                    const recommendationsContent = document.getElementById('aiRecommendationsContent');
-                    const recommendationsLoader = document.getElementById('aiRecommendationsLoader');
+            const recommendationsContent = document.getElementById('aiRecommendationsContent');
+            const recommendationsLoader = document.getElementById('aiRecommendationsLoader');
 
-                    // Anzeigen und Ladeindikator aktivieren
-                    recommendationsCard.style.display = 'block';
-                    recommendationsLoader.style.display = 'block';
-                    recommendationsContent.style.display = 'none';
+            // Anzeigen und Ladeindikator aktivieren
+            recommendationsCard.style.display = 'block';
+            recommendationsLoader.style.display = 'block';
+            recommendationsContent.style.display = 'none';
 
-                    // Empfehlungen abrufen
-                    const data = await apiRequest(`/analysis/${analysisId}/ai-recommendations`);
+            // Empfehlungen abrufen
+            const data = await apiRequest(`/analysis/${analysisId}/ai-recommendations`);
 
-                    if (!data.recommendations || data.recommendations.length === 0) {
-                        recommendationsContent.innerHTML = '<p>Keine KI-Empfehlungen verfügbar.</p>';
-                    } else {
-                        // Empfehlungen anzeigen
-                        displayAIRecommendations(data.recommendations);
-                    }
-
-                    // Ladeindikator ausblenden und Inhalt anzeigen
-                    recommendationsLoader.style.display = 'none';
-                    recommendationsContent.style.display = 'block';
-                } catch (error) {
-                    console.error('Fehler beim Laden der KI-Empfehlungen:', error);
-
-                    // In der UI auf den Fehler hinweisen, falls die Elemente existieren
-                    const recommendationsError = document.getElementById('aiRecommendationsError');
-                    const recommendationsLoader = document.getElementById('aiRecommendationsLoader');
-
-                    if (recommendationsError && recommendationsLoader) {
-                        recommendationsLoader.style.display = 'none';
-                        recommendationsError.style.display = 'block';
-                        recommendationsError.textContent = `Fehler: ${error.message || 'Unbekannter Fehler'}`;
-                    }
-                }
+            if (!data.recommendations || data.recommendations.length === 0) {
+                recommendationsContent.innerHTML = '<p>Keine KI-Empfehlungen verfügbar.</p>';
+            } else {
+                // Empfehlungen anzeigen
+                displayAIRecommendations(data.recommendations);
             }
 
-            // KI-Empfehlungen anzeigen
-            function displayAIRecommendations(recommendations) {
-                const container = document.getElementById('aiRecommendationsContent');
-                if (!container) return;
+            // Ladeindikator ausblenden und Inhalt anzeigen
+            recommendationsLoader.style.display = 'none';
+            recommendationsContent.style.display = 'block';
+        } catch (error) {
+            console.error('Fehler beim Laden der KI-Empfehlungen:', error);
 
-                container.innerHTML = '';
+            // In der UI auf den Fehler hinweisen, falls die Elemente existieren
+            const recommendationsError = document.getElementById('aiRecommendationsError');
+            const recommendationsLoader = document.getElementById('aiRecommendationsLoader');
 
-                if (recommendations.generatedAt) {
-                    // Generierungsdatum anzeigen
-                    const generatedDate = new Date(recommendations.generatedAt);
-                    const dateElement = document.createElement('p');
-                    dateElement.className = 'text-muted small mb-4';
-                    dateElement.textContent = `Generiert am: ${formatDate(recommendations.generatedAt)}`;
-                    container.appendChild(dateElement);
-                }
+            if (recommendationsError && recommendationsLoader) {
+                recommendationsLoader.style.display = 'none';
+                recommendationsError.style.display = 'block';
+                recommendationsError.textContent = `Fehler: ${error.message || 'Unbekannter Fehler'}`;
+            }
+        }
+    }
 
-                // Empfehlungsliste erstellen
-                const recommendationsList = document.createElement('div');
-                recommendationsList.className = 'recommendations-list';
+    // KI-Empfehlungen anzeigen
+    function displayAIRecommendations(recommendations) {
+        const container = document.getElementById('aiRecommendationsContent');
+        if (!container) return;
 
-                recommendations.recommendations.forEach((rec, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'recommendation-card mb-3';
-                    card.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-                    card.style.borderRadius = '5px';
-                    card.style.padding = '15px';
-                    card.style.marginBottom = '15px';
+        container.innerHTML = '';
 
-                    // Header mit Titel und Badges
-                    const header = document.createElement('div');
-                    header.className = 'recommendation-header';
-                    header.style.display = 'flex';
-                    header.style.justifyContent = 'space-between';
-                    header.style.alignItems = 'center';
-                    header.style.marginBottom = '10px';
+        if (recommendations.generatedAt) {
+            // Generierungsdatum anzeigen
+            const generatedDate = new Date(recommendations.generatedAt);
+            const dateElement = document.createElement('p');
+            dateElement.className = 'text-muted small mb-4';
+            dateElement.textContent = `Generiert am: ${formatDate(recommendations.generatedAt)}`;
+            container.appendChild(dateElement);
+        }
 
-                    // Titel mit Nummer
-                    const title = document.createElement('h4');
-                    title.style.margin = '0';
-                    title.style.fontSize = '1.1rem';
-                    title.style.fontWeight = '600';
-                    title.textContent = `${index + 1}. ${rec.title}`;
+        // Empfehlungsliste erstellen
+        const recommendationsList = document.createElement('div');
+        recommendationsList.className = 'recommendations-list';
 
-                    header.appendChild(title);
+        recommendations.recommendations.forEach((rec, index) => {
+            const card = document.createElement('div');
+            card.className = 'recommendation-card mb-3';
+            card.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+            card.style.borderRadius = '5px';
+            card.style.padding = '15px';
+            card.style.marginBottom = '15px';
 
-                    // Badges-Container
-                    const badges = document.createElement('div');
-                    badges.style.display = 'flex';
-                    badges.style.gap = '5px';
+            // Header mit Titel und Badges
+            const header = document.createElement('div');
+            header.className = 'recommendation-header';
+            header.style.display = 'flex';
+            header.style.justifyContent = 'space-between';
+            header.style.alignItems = 'center';
+            header.style.marginBottom = '10px';
 
-                    // Kategorie-Badge
-                    if (rec.category) {
-                        const categoryBadge = document.createElement('span');
-                        categoryBadge.className = `badge badge-${getCategoryBadgeClass(rec.category)}`;
-                        categoryBadge.textContent = rec.category;
-                        badges.appendChild(categoryBadge);
-                    }
+            // Titel mit Nummer
+            const title = document.createElement('h4');
+            title.style.margin = '0';
+            title.style.fontSize = '1.1rem';
+            title.style.fontWeight = '600';
+            title.textContent = `${index + 1}. ${rec.title}`;
 
-                    // Priorität-Badge
-                    if (rec.priority) {
-                        const priorityBadge = document.createElement('span');
-                        priorityBadge.className = `badge badge-${getPriorityBadgeClass(rec.priority)}`;
-                        priorityBadge.textContent = rec.priority;
-                        badges.appendChild(priorityBadge);
-                    }
+            header.appendChild(title);
 
-                    header.appendChild(badges);
-                    card.appendChild(header);
+            // Badges-Container
+            const badges = document.createElement('div');
+            badges.style.display = 'flex';
+            badges.style.gap = '5px';
 
-                    // Beschreibung
-                    if (rec.description) {
-                        const descriptionTitle = document.createElement('h5');
-                        descriptionTitle.textContent = 'Beschreibung:';
-                        descriptionTitle.style.fontSize = '0.9rem';
-                        descriptionTitle.style.marginTop = '15px';
-                        descriptionTitle.style.marginBottom = '5px';
-                        card.appendChild(descriptionTitle);
-
-                        const description = document.createElement('p');
-                        description.style.margin = '0 0 15px 0';
-                        description.textContent = rec.description;
-                        card.appendChild(description);
-                    }
-
-                    // Vorteile
-                    if (rec.benefits) {
-                        const benefitsTitle = document.createElement('h5');
-                        benefitsTitle.textContent = 'Vorteile:';
-                        benefitsTitle.style.fontSize = '0.9rem';
-                        benefitsTitle.style.marginTop = '15px';
-                        benefitsTitle.style.marginBottom = '5px';
-                        card.appendChild(benefitsTitle);
-
-                        const benefits = document.createElement('p');
-                        benefits.style.margin = '0';
-                        benefits.textContent = rec.benefits;
-                        card.appendChild(benefits);
-                    }
-
-                    recommendationsList.appendChild(card);
-                });
-
-                container.appendChild(recommendationsList);
-
-                // Event-Listener für Aktualisieren-Button hinzufügen
-                const refreshButton = document.getElementById('refreshAiRecommendationsBtn');
-                if (refreshButton) {
-                    refreshButton.addEventListener('click', () => {
-                        if (currentAnalysisId) {
-                            loadAIRecommendations(currentAnalysisId);
-                        }
-                    });
-                }
+            // Kategorie-Badge
+            if (rec.category) {
+                const categoryBadge = document.createElement('span');
+                categoryBadge.className = `badge badge-${getCategoryBadgeClass(rec.category)}`;
+                categoryBadge.textContent = rec.category;
+                badges.appendChild(categoryBadge);
             }
 
-            // Hilfsfunktion: CSS-Klasse für Kategorie-Badge bestimmen
-            function getCategoryBadgeClass(category) {
-                if (!category) return 'secondary';
-
-                switch (category.toLowerCase()) {
-                    case 'seo': return 'primary';
-                    case 'performance': return 'warning';
-                    case 'inhalt': return 'info';
-                    case 'sicherheit': return 'success';
-                    case 'mobile': return 'secondary';
-                    default: return 'dark';
-                }
+            // Priorität-Badge
+            if (rec.priority) {
+                const priorityBadge = document.createElement('span');
+                priorityBadge.className = `badge badge-${getPriorityBadgeClass(rec.priority)}`;
+                priorityBadge.textContent = rec.priority;
+                badges.appendChild(priorityBadge);
             }
 
-            // Hilfsfunktion: CSS-Klasse für Priorität-Badge bestimmen
-            function getPriorityBadgeClass(priority) {
-                if (!priority) return 'secondary';
+            header.appendChild(badges);
+            card.appendChild(header);
 
-                switch (priority.toLowerCase()) {
-                    case 'hoch': return 'danger';
-                    case 'mittel': return 'warning';
-                    case 'normal': return 'secondary';
-                    default: return 'secondary';
-                }
+            // Beschreibung
+            if (rec.description) {
+                const descriptionTitle = document.createElement('h5');
+                descriptionTitle.textContent = 'Beschreibung:';
+                descriptionTitle.style.fontSize = '0.9rem';
+                descriptionTitle.style.marginTop = '15px';
+                descriptionTitle.style.marginBottom = '5px';
+                card.appendChild(descriptionTitle);
+
+                const description = document.createElement('p');
+                description.style.margin = '0 0 15px 0';
+                description.textContent = rec.description;
+                card.appendChild(description);
             }
+
+            // Vorteile
+            if (rec.benefits) {
+                const benefitsTitle = document.createElement('h5');
+                benefitsTitle.textContent = 'Vorteile:';
+                benefitsTitle.style.fontSize = '0.9rem';
+                benefitsTitle.style.marginTop = '15px';
+                benefitsTitle.style.marginBottom = '5px';
+                card.appendChild(benefitsTitle);
+
+                const benefits = document.createElement('p');
+                benefits.style.margin = '0';
+                benefits.textContent = rec.benefits;
+                card.appendChild(benefits);
+            }
+
+            recommendationsList.appendChild(card);
         });
+
+        container.appendChild(recommendationsList);
+
+        // Event-Listener für Aktualisieren-Button hinzufügen
+        const refreshButton = document.getElementById('refreshAiRecommendationsBtn');
+        if (refreshButton) {
+            refreshButton.addEventListener('click', () => {
+                if (currentAnalysisId) {
+                    loadAIRecommendations(currentAnalysisId);
+                }
+            });
+        }
+    }
+
+    // Hilfsfunktion: CSS-Klasse für Kategorie-Badge bestimmen
+    function getCategoryBadgeClass(category) {
+        if (!category) return 'secondary';
+
+        switch (category.toLowerCase()) {
+            case 'seo': return 'primary';
+            case 'performance': return 'warning';
+            case 'inhalt': return 'info';
+            case 'sicherheit': return 'success';
+            case 'mobile': return 'secondary';
+            default: return 'dark';
+        }
+    }
+
+    // Hilfsfunktion: CSS-Klasse für Priorität-Badge bestimmen
+    function getPriorityBadgeClass(priority) {
+        if (!priority) return 'secondary';
+
+        switch (priority.toLowerCase()) {
+            case 'hoch': return 'danger';
+            case 'mittel': return 'warning';
+            case 'normal': return 'secondary';
+            default: return 'secondary';
+        }
+    }
 </script>
 </body>
 </html>

@@ -18,7 +18,7 @@ public class SeoAnalyzerImpl implements SeoAnalyzer {
         logger.info("Starte SEO-Analyse für URL: " + url);
 
         SeoResult result = new SeoResult();
-        result.setUrl(url);
+        result.setUrl(url);  // Wichtig: URL setzen
 
         try {
             // Website mit Jsoup laden
@@ -41,7 +41,7 @@ public class SeoAnalyzerImpl implements SeoAnalyzer {
      */
     public SeoResult analyzeDocument(Document doc, String url) {
         SeoResult result = new SeoResult();
-        result.setUrl(url);
+        result.setUrl(url);  // Wichtig: URL setzen
 
         // Meta-Tags extrahieren
         String title = doc.title();
@@ -71,25 +71,9 @@ public class SeoAnalyzerImpl implements SeoAnalyzer {
         result.setImagesWithoutAlt(imagesWithoutAlt);
         result.setAltImagePercentage(altPercentage);
 
-        // Links analysieren - Korrigiert: String-Konkatenation in den Selektoren
+        // Links analysieren - korrigierte Version
         int internalLinks = doc.select("a[href^=/], a[href^=" + url + "]").size();
-        // Korrektur: Selektoren ordnungsgemäß erstellen
-        Elements externalLinksElements = doc.select("a[href^=http]");
-        Elements notInternalLinks = doc.select("a[href^=" + url + "]");
-        // Filtern statt nicht funktionierender .not() Methode
-        int externalLinks = 0;
-        for (org.jsoup.nodes.Element link : externalLinksElements) {
-            boolean isExternal = true;
-            for (org.jsoup.nodes.Element internalLink : notInternalLinks) {
-                if (link.equals(internalLink)) {
-                    isExternal = false;
-                    break;
-                }
-            }
-            if (isExternal) {
-                externalLinks++;
-            }
-        }
+        int externalLinks = doc.select("a[href^=http]").size() - doc.select("a[href^=" + url + "]").size();
 
         result.setInternalLinks(internalLinks);
         result.setExternalLinks(externalLinks);
@@ -99,7 +83,8 @@ public class SeoAnalyzerImpl implements SeoAnalyzer {
         result.setCanonicalUrl(canonicalUrl);
 
         // SEO-Score berechnen
-        calculateScore(result);
+        int score = result.calculateScore(); // Ensure this method exists and works correctly
+        result.setScore(score);
 
         logger.info("SEO-Analyse abgeschlossen. Score: " + result.getScore());
 
@@ -113,60 +98,5 @@ public class SeoAnalyzerImpl implements SeoAnalyzer {
     @Override
     public SeoResult analyze(Document document, String url) {
         return analyzeDocument(document, url);
-    }
-
-    /**
-     * Berechnet einen SEO-Score basierend auf den gesammelten Daten.
-     * Der Score ist eine Zahl zwischen 0 und 100.
-     */
-    private void calculateScore(SeoResult result) {
-        int score = 0;
-        int totalFactors = 5;
-
-        // Titel-Faktor (optimal: 30-60 Zeichen)
-        if (result.getTitle() != null && !result.getTitle().isEmpty()) {
-            int titleLength = result.getTitleLength();
-            if (titleLength >= 30 && titleLength <= 60) {
-                score += 20; // Volle Punktzahl
-            } else if (titleLength >= 20 && titleLength <= 70) {
-                score += 10; // Teilweise Punktzahl
-            }
-        }
-
-        // Beschreibungs-Faktor (optimal: 50-160 Zeichen)
-        if (result.getDescription() != null && !result.getDescription().isEmpty()) {
-            int descLength = result.getDescriptionLength();
-            if (descLength >= 50 && descLength <= 160) {
-                score += 20; // Volle Punktzahl
-            } else if (descLength >= 25 && descLength <= 200) {
-                score += 10; // Teilweise Punktzahl
-            }
-        }
-
-        // H1-Faktor (optimal: genau 1)
-        int h1Count = result.getH1Count();
-        if (h1Count == 1) {
-            score += 20; // Volle Punktzahl
-        } else if (h1Count > 0) {
-            score += 10; // Teilweise Punktzahl
-        }
-
-        // Bild-Alt-Text-Faktor (optimal: 100%)
-        float altPercentage = (float) result.getAltImagePercentage();
-        if (altPercentage >= 90) {
-            score += 20; // Volle Punktzahl
-        } else if (altPercentage >= 60) {
-            score += 10; // Teilweise Punktzahl
-        }
-
-        // Link-Faktor (optimal: Sowohl interne als auch externe Links)
-        if (result.getInternalLinks() > 0 && result.getExternalLinks() > 0) {
-            score += 20; // Volle Punktzahl
-        } else if (result.getInternalLinks() > 0 || result.getExternalLinks() > 0) {
-            score += 10; // Teilweise Punktzahl
-        }
-
-        // Gesamtscore setzen
-        result.setScore(score);
     }
 }

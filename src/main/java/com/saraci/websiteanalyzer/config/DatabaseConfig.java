@@ -63,6 +63,7 @@ public class DatabaseConfig {
                 "CREATE TABLE IF NOT EXISTS analysis_results (" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                         "website_id INTEGER NOT NULL, " +
+                        "url TEXT NOT NULL, " + // Neue Spalte für die URL
                         "analysis_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
                         "pdf_report_path TEXT, " +
                         "FOREIGN KEY (website_id) REFERENCES websites(id)" +

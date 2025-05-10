@@ -119,6 +119,8 @@
               const data = { url, email };
               const response = await apiRequest('/analyze', 'POST', data);
 
+              console.log("API-Antwort:", response); // Debug-Logging
+
               // Loader ausblenden und Ergebnisse anzeigen
               loader.style.display = 'none';
               resultsCard.style.display = 'block';
@@ -156,7 +158,7 @@
 
       // Funktion zum Anzeigen der Ergebnisse
       function displayResults(response, url) {
-          const report = response.report || {};
+          console.log("Erhaltene Analyseergebnisse:", response); // Debug-Logging
 
           let html = `
               <div class="alert alert-success">
@@ -168,15 +170,18 @@
           `;
 
           // SEO-Score
-          const seoScore = report.seo?.score || 'N/A';
+          const seoScore = response.seoResult?.score || 'N/A';
+          console.log("SEO-Score:", seoScore); // Debug-Logging
           html += createScoreHTML(seoScore, 'SEO');
 
           // Performance-Score
-          const perfScore = report.performance?.score || 'N/A';
+          const perfScore = response.performanceResult?.lighthouseScore || 'N/A';
+          console.log("Performance-Score:", perfScore); // Debug-Logging
           html += createScoreHTML(perfScore, 'Performance');
 
           // Sicherheits-Score
-          const secScore = report.security?.securityHeadersScore || 'N/A';
+          const secScore = response.securityResult?.securityHeadersScore || 'N/A';
+          console.log("Sicherheits-Score:", secScore); // Debug-Logging
           html += createScoreHTML(secScore, 'Sicherheit');
 
           html += `
@@ -187,7 +192,7 @@
           `;
 
           // Erkenntnisse basierend auf den Scores
-          const insights = generateInsights(report);
+          const insights = generateInsights(response);
           insights.forEach(insight => {
               html += `<li>${insight}</li>`;
           });
@@ -218,52 +223,52 @@
       }
 
       // Funktion zum Generieren von Erkenntnissen basierend auf den Ergebnissen
-      function generateInsights(report) {
+      function generateInsights(response) {
           const insights = [];
 
           // SEO-Erkenntnisse
-          if (report.seo) {
-              if (report.seo.meta?.titleLength < 30 || report.seo.meta?.titleLength > 60) {
+          if (response.seoResult) {
+              if (response.seoResult.titleLength < 30 || response.seoResult.titleLength > 60) {
                   insights.push('Der Seitentitel hat nicht die optimale Länge (30-60 Zeichen).');
               }
 
-              if (report.seo.headings?.h1 !== 1) {
-                  insights.push(`Die Seite hat ${report.seo.headings?.h1 || 0} H1-Elemente (optimal: genau 1).`);
+              if (response.seoResult.h1Count !== 1) {
+                  insights.push(`Die Seite hat ${response.seoResult.h1Count || 0} H1-Elemente (optimal: genau 1).`);
               }
 
-              if (report.seo.images?.withoutAlt > 0) {
-                  insights.push(`${report.seo.images.withoutAlt} Bilder haben keinen Alt-Text.`);
+              if (response.seoResult.imagesWithoutAlt > 0) {
+                  insights.push(`${response.seoResult.imagesWithoutAlt} Bilder haben keinen Alt-Text.`);
               }
           }
 
           // Performance-Erkenntnisse
-          if (report.performance) {
-              if (report.performance.score < 50) {
+          if (response.performanceResult) {
+              if (response.performanceResult.lighthouseScore < 50) {
                   insights.push('Die Website hat erhebliche Performance-Probleme.');
-              } else if (report.performance.score < 80) {
+              } else if (response.performanceResult.lighthouseScore < 80) {
                   insights.push('Die Website-Performance könnte verbessert werden.');
               }
           }
 
           // Sicherheits-Erkenntnisse
-          if (report.security) {
-              if (!report.security.https?.enabled) {
+          if (response.securityResult) {
+              if (!response.securityResult.httpsEnabled) {
                   insights.push('Die Website verwendet kein HTTPS, was ein Sicherheitsrisiko darstellt.');
               }
 
-              if (report.security.securityHeadersScore < 50) {
+              if (response.securityResult.securityHeadersScore < 50) {
                   insights.push('Wichtige Sicherheits-Header fehlen auf der Website.');
-                   }
-               }
+              }
+          }
 
-               // Standard-Erkenntnis, wenn keine anderen vorhanden sind
-               if (insights.length === 0) {
-                   insights.push('Die Website ist gut optimiert. Keine kritischen Probleme gefunden.');
-               }
+          // Standard-Erkenntnis, wenn keine anderen vorhanden sind
+          if (insights.length === 0) {
+              insights.push('Die Website ist gut optimiert. Keine kritischen Probleme gefunden.');
+          }
 
-               return insights;
-           }
-       });
+          return insights;
+      }
+  });
 </script>
 </body>
 </html>

@@ -78,15 +78,19 @@ public class WebsiteController implements Controller {
 
                 // URL-Dekodierung
                 url = java.net.URLDecoder.decode(url, "UTF-8");
+                logger.info("Verarbeite Anfrage für URL-Historie: " + url);
 
                 Website website = websiteRepository.findByUrl(url);
 
                 if (website == null) {
+                    logger.warning("Website nicht gefunden: " + url);
                     res.status(404);
                     return JsonUtil.toJson(JsonUtil.error("Website nicht gefunden"));
                 }
 
+                logger.info("Website gefunden mit ID: " + website.getId());
                 List<AnalysisResult> results = analysisResultRepository.findByWebsiteId(website.getId());
+                logger.info("Anzahl der gefundenen Analyseergebnisse: " + results.size());
 
                 return JsonUtil.toJson(
                         JsonUtil.success(

@@ -74,13 +74,14 @@ public class AnalysisResultRepositoryImpl implements AnalysisResultRepository {
      * Speichert das Hauptergebnis in der Datenbank.
      */
     private void saveMainResult(Connection conn, AnalysisResult result) throws SQLException {
-        String sql = "INSERT INTO analysis_results (website_id, analysis_date, pdf_report_path) " +
-                "VALUES (?, ?, ?)";
+        String sql = "INSERT INTO analysis_results (website_id, url, analysis_date, pdf_report_path) " +
+                "VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setLong(1, result.getWebsiteId());
-            pstmt.setTimestamp(2, Timestamp.valueOf(result.getAnalysisDate()));
-            pstmt.setString(3, result.getPdfReportPath());
+            pstmt.setString(2, result.getUrl()); // URL-Wert speichern
+            pstmt.setTimestamp(3, Timestamp.valueOf(result.getAnalysisDate()));
+            pstmt.setString(4, result.getPdfReportPath());
 
             pstmt.executeUpdate();
 
@@ -210,6 +211,7 @@ public class AnalysisResultRepositoryImpl implements AnalysisResultRepository {
                 AnalysisResult result = new AnalysisResult();
                 result.setId(rs.getLong("id"));
                 result.setWebsiteId(rs.getLong("website_id"));
+                result.setUrl(rs.getString("url")); // URL aus der Datenbank lesen
                 result.setAnalysisDate(rs.getTimestamp("analysis_date").toLocalDateTime());
                 result.setPdfReportPath(rs.getString("pdf_report_path"));
 
@@ -242,6 +244,7 @@ public class AnalysisResultRepositoryImpl implements AnalysisResultRepository {
                 AnalysisResult result = new AnalysisResult();
                 result.setId(rs.getLong("id"));
                 result.setWebsiteId(rs.getLong("website_id"));
+                result.setUrl(rs.getString("url")); // URL aus der Datenbank lesen
                 result.setAnalysisDate(rs.getTimestamp("analysis_date").toLocalDateTime());
                 result.setPdfReportPath(rs.getString("pdf_report_path"));
 
