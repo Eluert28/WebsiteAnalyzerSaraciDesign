@@ -1,16 +1,44 @@
 package com.saraci.websiteanalyzer.util;
 
+import com.google.gson.*;
+import java.lang.reflect.Type;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.logging.Logger;
 
 /**
  * Hilfsklasse für die Verarbeitung von JSON.
- * Diese einfache Implementierung dient nur zu Demonstrationszwecken.
- * In einer realen Anwendung sollte eine umfassendere JSON-Bibliothek wie Jackson oder Gson verwendet werden.
+ * Diese verbesserte Version verwendet die Gson-Bibliothek für eine korrekte JSON-Serialisierung und -Deserialisierung.
  */
 public class JsonUtil {
+    private static final Logger logger = Logger.getLogger(JsonUtil.class.getName());
+
+    // Erstelle einen benutzerdefinierten Gson-Builder mit einem TypeAdapter für LocalDateTime
+    private static final Gson gson = new GsonBuilder()
+            .setPrettyPrinting()
+            .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+            .create();
+
+    /**
+     * Benutzerdefinierter TypeAdapter für LocalDateTime.
+     */
+    private static class LocalDateTimeAdapter implements JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {
+        private final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
+        @Override
+        public JsonElement serialize(LocalDateTime src, Type typeOfSrc, JsonSerializationContext context) {
+            return new JsonPrimitive(formatter.format(src));
+        }
+
+        @Override
+        public LocalDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            return LocalDateTime.parse(json.getAsString(), formatter);
+        }
+    }
 
     /**
      * Wandelt ein Objekt in JSON um.
@@ -20,53 +48,7 @@ public class JsonUtil {
             return "null";
         }
 
-        if (obj instanceof String) {
-            return "\"" + escapeJsonString((String) obj) + "\"";
-        }
-
-        if (obj instanceof Number || obj instanceof Boolean) {
-            return obj.toString();
-        }
-
-        if (obj instanceof Map) {
-            Map<?, ?> map = (Map<?, ?>) obj;
-            StringBuilder json = new StringBuilder("{");
-            boolean first = true;
-
-            for (Map.Entry<?, ?> entry : map.entrySet()) {
-                if (!first) {
-                    json.append(",");
-                }
-                first = false;
-
-                json.append("\"").append(entry.getKey()).append("\":");
-                json.append(toJson(entry.getValue()));
-            }
-
-            json.append("}");
-            return json.toString();
-        }
-
-        if (obj instanceof Iterable) {
-            Iterable<?> iterable = (Iterable<?>) obj;
-            StringBuilder json = new StringBuilder("[");
-            boolean first = true;
-
-            for (Object item : iterable) {
-                if (!first) {
-                    json.append(",");
-                }
-                first = false;
-
-                json.append(toJson(item));
-            }
-
-            json.append("]");
-            return json.toString();
-        }
-
-        // Für andere Objekte verwenden wir eine einfache toString-Methode
-        return "\"" + escapeJsonString(obj.toString()) + "\"";
+        return gson.toJson(obj);
     }
 
     /**
@@ -100,22 +82,6 @@ public class JsonUtil {
     }
 
     /**
-     * Entfernt Sonderzeichen aus einem JSON-String.
-     */
-    private static String escapeJsonString(String str) {
-        if (str == null) {
-            return "";
-        }
-
-        return str
-                .replace("\\", "\\\\")
-                .replace("\"", "\\\"")
-                .replace("\n", "\\n")
-                .replace("\r", "\\r")
-                .replace("\t", "\\t");
-    }
-
-    /**
      * Extrahiert einen String-Wert aus einem JSON-String.
      */
     public static String getStringValue(String json, String key) {
@@ -123,14 +89,21 @@ public class JsonUtil {
             return null;
         }
 
-        Pattern pattern = Pattern.compile("\"" + key + "\"\\s*:\\s*\"([^\"]*)\"");
-        Matcher matcher = pattern.matcher(json);
+        try {
+            // Versuche, den JSON-String zu parsen
+            Map<?, ?> map = gson.fromJson(json, Map.class);
+            Object value = map.get(key);
+            return value != null ? value.toString() : null;
+        } catch (Exception e) {
+            // Fallback auf Regex, wenn JSON-Parsing fehlschlägt
+            Pattern pattern = Pattern.compile("\"" + key + "\"\\s*:\\s*\"([^\"]*)\"");
+            Matcher matcher = pattern.matcher(json);
 
-        if (matcher.find()) {
-            return matcher.group(1);
+            if (matcher.find()) {
+                return matcher.group(1);
+            }
+            return null;
         }
-
-        return null;
     }
 
     /**
@@ -141,18 +114,31 @@ public class JsonUtil {
             return null;
         }
 
-        Pattern pattern = Pattern.compile("\"" + key + "\"\\s*:\\s*(\\d+)");
-        Matcher matcher = pattern.matcher(json);
+        try {
+            // Versuche, den JSON-String zu parsen
+            Map<?, ?> map = gson.fromJson(json, Map.class);
+            Object value = map.get(key);
 
-        if (matcher.find()) {
-            try {
-                return Long.parseLong(matcher.group(1));
-            } catch (NumberFormatException e) {
-                return null;
+            if (value instanceof Number) {
+                return ((Number) value).longValue();
+            } else if (value instanceof String) {
+                return Long.parseLong((String) value);
             }
-        }
+            return null;
+        } catch (Exception e) {
+            // Fallback auf Regex, wenn JSON-Parsing fehlschlägt
+            Pattern pattern = Pattern.compile("\"" + key + "\"\\s*:\\s*(\\d+)");
+            Matcher matcher = pattern.matcher(json);
 
-        return null;
+            if (matcher.find()) {
+                try {
+                    return Long.parseLong(matcher.group(1));
+                } catch (NumberFormatException ex) {
+                    return null;
+                }
+            }
+            return null;
+        }
     }
 
     /**
@@ -163,13 +149,44 @@ public class JsonUtil {
             return null;
         }
 
-        Pattern pattern = Pattern.compile("\"" + key + "\"\\s*:\\s*(true|false)");
-        Matcher matcher = pattern.matcher(json);
+        try {
+            // Versuche, den JSON-String zu parsen
+            Map<?, ?> map = gson.fromJson(json, Map.class);
+            Object value = map.get(key);
 
-        if (matcher.find()) {
-            return Boolean.parseBoolean(matcher.group(1));
+            if (value instanceof Boolean) {
+                return (Boolean) value;
+            } else if (value instanceof String) {
+                return Boolean.parseBoolean((String) value);
+            }
+            return null;
+        } catch (Exception e) {
+            // Fallback auf Regex, wenn JSON-Parsing fehlschlägt
+            Pattern pattern = Pattern.compile("\"" + key + "\"\\s*:\\s*(true|false)");
+            Matcher matcher = pattern.matcher(json);
+
+            if (matcher.find()) {
+                return Boolean.parseBoolean(matcher.group(1));
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Parst einen JSON-String zu einem Map-Objekt.
+     */
+    public static Map<String, Object> fromJson(String json) {
+        if (json == null || json.isEmpty()) {
+            return new HashMap<>();
         }
 
-        return null;
+        try {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> map = gson.fromJson(json, Map.class);
+            return map != null ? map : new HashMap<>();
+        } catch (Exception e) {
+            logger.warning("Fehler beim Parsen des JSON-Strings: " + e.getMessage());
+            return new HashMap<>();
+        }
     }
 }

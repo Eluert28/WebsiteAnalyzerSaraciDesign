@@ -14,11 +14,13 @@ const API_BASE_URL = '/api';
  */
 async function apiRequest(endpoint, method = 'GET', data = null) {
     const url = API_BASE_URL + endpoint;
+    console.log(`Sende ${method}-Anfrage an: ${url}`);
 
     const options = {
         method,
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json' // Wichtig: Explizit JSON anfordern
         }
     };
 
@@ -28,20 +30,32 @@ async function apiRequest(endpoint, method = 'GET', data = null) {
 
     try {
         const response = await fetch(url, options);
+        console.log(`Status-Code: ${response.status}`);
+
+        // Extrahiere den Content-Type
+        const contentType = response.headers.get('Content-Type');
+        console.log(`Content-Type: ${contentType}`);
 
         // Bei Download-Anfragen die Blob-Antwort zurückgeben
-        if (response.headers.get('Content-Type') === 'application/pdf') {
+        if (contentType && contentType.includes('application/pdf')) {
             return await response.blob();
         }
 
-        // Bei normalen Anfragen JSON zurückgeben
-        const responseData = await response.json();
+        // Bei JSON-Antworten
+        if (contentType && contentType.includes('application/json')) {
+            const responseData = await response.json();
 
-        if (!response.ok) {
-            throw new Error(responseData.error || 'Ein Fehler ist aufgetreten');
+            if (!response.ok) {
+                throw new Error(responseData.error || 'Ein Fehler ist aufgetreten');
+            }
+
+            return responseData;
         }
 
-        return responseData;
+        // Falls keine JSON-Antwort
+        const text = await response.text();
+        console.error('Unerwartete Antwort:', text.substring(0, 100)); // ersten 100 Zeichen der Antwort anzeigen
+        throw new Error(`Unerwartetes Antwortformat: ${contentType}`);
     } catch (error) {
         console.error('API-Fehler:', error);
         throw error;
