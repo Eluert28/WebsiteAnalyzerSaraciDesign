@@ -391,6 +391,33 @@
             });
         }
 
+/**
+ * Erstellt einen dynamischen Kreis-Score mit Prozentanzeige
+ * @param {number|string} score - Der Score-Wert (0-100)
+ * @param {string} label - Das Label für den Score
+ */
+function createScoreHTML(score, label) {
+    const scoreClass = getScoreClass(score);
+    const scoreValue = (score === 'N/A' || isNaN(score)) ? score : Math.round(score);
+
+    // Berechne die Rotation für den Kreisbalken
+    let rotation = 0;
+    if (scoreValue !== 'N/A' && !isNaN(scoreValue)) {
+        // 0 Grad: Leerer Kreis, 360 Grad: Voller Kreis
+        // Die -45 korrigiert die Startposition des Balkens (standardmäßig bei 3 Uhr)
+        rotation = ((scoreValue / 100) * 360) - 45;
+        if (rotation < -45) rotation = -45; // Verhindere negative Werte
+    }
+
+    return `
+        <div class="score-item" style="text-align: center; margin: 0 10px 20px;">
+            <div class="score-circle ${scoreClass}" style="--rotation: ${rotation}deg;">
+                <div class="score-value">${scoreValue}</div>
+            </div>
+            <div class="score-label">${label}</div>
+        </div>
+    `;
+}
         // Diagramm mit historischen Daten erstellen
         function createHistoryChart(analyses) {
             // Bestehenden Chart löschen, falls vorhanden

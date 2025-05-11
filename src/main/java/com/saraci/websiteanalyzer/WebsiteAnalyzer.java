@@ -39,7 +39,16 @@ public class WebsiteAnalyzer {
                     appConfig.getAnalysisResultRepository(),
                     appConfig.getScheduleRepository()
             );
-            schedulerService.initialize();
+
+            // Prüfe, ob Zeitpläne automatisch ausgeführt werden sollen
+            boolean enableSchedulerAtStartup = Boolean.parseBoolean(AppConfig.getEnv("ENABLE_SCHEDULER_STARTUP", "false"));
+            if (enableSchedulerAtStartup) {
+                logger.info("Scheduler wird initialisiert und startet geplante Aufgaben...");
+                schedulerService.initialize();
+            } else {
+                logger.info("Scheduler wird nur initialisiert, keine automatische Ausführung von Zeitplänen.");
+                schedulerService.initializeWithoutExecution();
+            }
 
             // Initialisiere die Controller und registriere die Routen
             ControllerRegistry controllerRegistry = new ControllerRegistry(appConfig, schedulerService);

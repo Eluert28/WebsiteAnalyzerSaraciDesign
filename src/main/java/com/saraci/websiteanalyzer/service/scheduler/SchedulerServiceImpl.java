@@ -9,8 +9,6 @@ import com.saraci.websiteanalyzer.repository.WebsiteRepository;
 import com.saraci.websiteanalyzer.service.WebsiteAnalyzerService;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,10 +55,63 @@ public class SchedulerServiceImpl implements SchedulerService {
         List<AnalysisSchedule> schedules = scheduleRepository.findAllActive();
         logger.info("Lade " + schedules.size() + " aktive Zeitpläne");
 
-        // Plane jeden Zeitplan
+        // Plane jeden Zeitplan mit sofortiger Ausführung
         for (AnalysisSchedule schedule : schedules) {
             scheduleAnalysis(schedule);
         }
+    }
+
+    @Override
+    public void initializeWithoutExecution() throws Exception {
+        // Lade alle aktiven Zeitpläne aus der Datenbank
+        List<AnalysisSchedule> schedules = scheduleRepository.findAllActive();
+        logger.info("Lade " + schedules.size() + " aktive Zeitpläne (ohne sofortige Ausführung)");
+
+        // Plane jeden Zeitplan mit verzögerter Ausführung
+        for (AnalysisSchedule schedule : schedules) {
+            scheduleAnalysisWithDelay(schedule);
+        }
+    }
+
+    /**
+     * Plant eine Website-Analyse mit verzögerter erster Ausführung.
+     */
+    private void scheduleAnalysisWithDelay(AnalysisSchedule schedule) throws Exception {
+        // Validiere den Zeitplan
+        if (schedule == null || schedule.getCronExpression() == null) {
+            throw new IllegalArgumentException("Ungültiger Zeitplan: Cron-Ausdruck ist erforderlich");
+        }
+
+        // Task erstellen
+        Runnable task = () -> {
+            try {
+                executeScheduledAnalysis(schedule);
+            } catch (Exception e) {
+                logger.severe("Fehler bei der geplanten Analyse: " + e.getMessage());
+            }
+        };
+
+        // Intervall basierend auf dem Cron-Ausdruck bestimmen
+        long interval = getIntervalFromCronExpression(schedule.getCronExpression());
+
+        // Task planen mit Verzögerung für die erste Ausführung
+        ScheduledFuture<?> future = executorService.scheduleAtFixedRate(
+                task, interval, interval, TimeUnit.SECONDS // Erste Ausführung nach einem Intervall
+        );
+
+        // Task in der Map speichern
+        if (scheduledTasks.containsKey(schedule.getId())) {
+            scheduledTasks.get(schedule.getId()).cancel(false);
+        }
+
+        scheduledTasks.put(schedule.getId(), future);
+        logger.info("Analyse für Website-ID " + schedule.getWebsiteId() +
+                " geplant mit Intervall " + (interval / 3600) + " Stunden, Zeitplan-ID: " + schedule.getId() +
+                " (erste Ausführung verzögert)");
+
+        // Nächsten Ausführungszeitpunkt berechnen und speichern
+        schedule.setNextRun(LocalDateTime.now().plusSeconds(interval));
+        scheduleRepository.update(schedule);
     }
 
     @Override

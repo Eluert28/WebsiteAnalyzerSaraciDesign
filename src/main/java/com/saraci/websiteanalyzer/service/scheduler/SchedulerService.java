@@ -9,8 +9,16 @@ public interface SchedulerService {
 
     /**
      * Initialisiert den Scheduler und lädt alle aktiven Zeitpläne.
+     * Die Zeitpläne werden sofort nach dem Laden ausgeführt.
      */
     void initialize() throws Exception;
+
+    /**
+     * Initialisiert den Scheduler und lädt alle aktiven Zeitpläne,
+     * führt sie aber nicht sofort aus.
+     * Die Zeitpläne werden erst zum nächsten geplanten Zeitpunkt ausgeführt.
+     */
+    void initializeWithoutExecution() throws Exception;
 
     /**
      * Plant eine Website-Analyse basierend auf einem Zeitplan.

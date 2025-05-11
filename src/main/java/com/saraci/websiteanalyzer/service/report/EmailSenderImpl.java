@@ -10,6 +10,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import java.io.File;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -45,12 +46,22 @@ public class EmailSenderImpl implements EmailSender {
             props.put("mail.smtp.host", emailConfig.getHost());
             props.put("mail.smtp.port", emailConfig.getPort());
 
+            // Gmail-spezifische Einstellungen
+            props.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+            props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+
+            // Debug-Modus aktivieren
+            props.put("mail.debug", "true");
+
             // Session erstellen mit Authentifizierung
             Session session = Session.getInstance(props, new Authenticator() {
                 protected PasswordAuthentication getPasswordAuthentication() {
                     return new PasswordAuthentication(emailConfig.getUsername(), emailConfig.getPassword());
                 }
             });
+
+            // Debug-Ausgaben der Session
+            logger.info("JavaMail-Session erstellt mit Benutzername: " + emailConfig.getUsername());
 
             // E-Mail-Nachricht erstellen
             Message message = new MimeMessage(session);
@@ -73,11 +84,17 @@ public class EmailSenderImpl implements EmailSender {
 
             // Anhang hinzufügen, falls vorhanden
             if (attachmentPath != null && !attachmentPath.isEmpty()) {
-                messageBodyPart = new MimeBodyPart();
-                DataSource source = new FileDataSource(attachmentPath);
-                messageBodyPart.setDataHandler(new DataHandler(source));
-                messageBodyPart.setFileName(attachmentPath.substring(attachmentPath.lastIndexOf('/') + 1));
-                multipart.addBodyPart(messageBodyPart);
+                File attachmentFile = new File(attachmentPath);
+                if (attachmentFile.exists()) {
+                    messageBodyPart = new MimeBodyPart();
+                    DataSource source = new FileDataSource(attachmentFile);
+                    messageBodyPart.setDataHandler(new DataHandler(source));
+                    messageBodyPart.setFileName(attachmentFile.getName());
+                    multipart.addBodyPart(messageBodyPart);
+                    logger.info("Anhang hinzugefügt: " + attachmentPath);
+                } else {
+                    logger.warning("Anhang-Datei existiert nicht: " + attachmentPath);
+                }
             }
 
             // Setze die Teile in die Nachricht
@@ -87,8 +104,14 @@ public class EmailSenderImpl implements EmailSender {
             Transport.send(message);
 
             logger.info("E-Mail erfolgreich gesendet");
+        } catch (MessagingException e) {
+            logger.severe("MessagingException beim Senden der E-Mail: " + e.getMessage());
+            if (e.getCause() != null) {
+                logger.severe("Ursache: " + e.getCause().getMessage());
+            }
+            throw new Exception("Fehler beim Senden der E-Mail: " + e.getMessage(), e);
         } catch (Exception e) {
-            logger.severe("Fehler beim Senden der E-Mail: " + e.getMessage());
+            logger.severe("Allgemeiner Fehler beim Senden der E-Mail: " + e.getMessage());
             throw new Exception("Fehler beim Senden der E-Mail: " + e.getMessage(), e);
         }
     }

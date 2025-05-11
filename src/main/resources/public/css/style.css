@@ -375,9 +375,35 @@ tr:hover {
     height: 100%;
     border-radius: 50%;
     border: 5px solid;
-    border-color: var(--accent-color) var(--accent-color) transparent transparent;
-    transform: rotate(0deg);
+    border-color: transparent;
+    transform: rotate(var(--rotation, -45deg));
     box-sizing: border-box;
+    transition: transform 1s ease;
+}
+
+.score-circle.success::before {
+    border-color: var(--success-color) var(--success-color) transparent transparent;
+}
+
+.score-circle.warning::before {
+    border-color: var(--warning-color) var(--warning-color) transparent transparent;
+}
+
+.score-circle.error::before {
+    border-color: var(--error-color) var(--error-color) transparent transparent;
+}
+
+.score-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.score-label {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-color-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .score-value {

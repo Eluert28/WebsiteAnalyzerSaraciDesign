@@ -102,6 +102,10 @@
       const downloadReportBtn = document.getElementById('downloadReportBtn');
       const viewDetailsBtn = document.getElementById('viewDetailsBtn');
 
+      // Konstanten für Timeout
+      const ANALYSIS_TIMEOUT_MS = 120000; // 2 Minuten Timeout
+      let analysisTimeoutId = null;
+
       // Analysieren-Formular absenden
       analyzeForm.addEventListener('submit', async function(e) {
           e.preventDefault();
@@ -114,12 +118,28 @@
           loader.style.display = 'block';
           resultsCard.style.display = 'none';
 
+          // Timeout für die Analyse setzen
+          analysisTimeoutId = setTimeout(() => {
+              // Timeout-Abbruch
+              console.log("Analyse-Timeout nach", ANALYSIS_TIMEOUT_MS/1000, "Sekunden");
+              loader.style.display = 'none';
+              analyzeForm.style.display = 'block';
+              showAlert('Die Analyse wurde nach ' + (ANALYSIS_TIMEOUT_MS/1000) + ' Sekunden automatisch abgebrochen. Bitte versuchen Sie es mit einer anderen Website oder später erneut.', 'error');
+          }, ANALYSIS_TIMEOUT_MS);
+
           try {
               // API-Anfrage senden
               const data = { url, email };
+              console.log("Sende Analyse-Anfrage für URL:", url);
               const response = await apiRequest('/analyze', 'POST', data);
 
-              console.log("API-Antwort:", response); // Debug-Logging
+              // Timeout aufheben, da Antwort erhalten wurde
+              if (analysisTimeoutId) {
+                  clearTimeout(analysisTimeoutId);
+                  analysisTimeoutId = null;
+              }
+
+              console.log("API-Antwort erhalten:", response); // Debug-Logging
 
               // Loader ausblenden und Ergebnisse anzeigen
               loader.style.display = 'none';
@@ -147,6 +167,14 @@
               analyzeForm.style.display = 'block';
 
           } catch (error) {
+              // Timeout aufheben
+              if (analysisTimeoutId) {
+                  clearTimeout(analysisTimeoutId);
+                  analysisTimeoutId = null;
+              }
+
+              console.error("Fehler bei der Analyse:", error);
+
               // Fehler anzeigen
               showAlert(error.message || 'Ein Fehler ist bei der Analyse aufgetreten', 'error');
 
@@ -158,7 +186,7 @@
 
       // Funktion zum Anzeigen der Ergebnisse
       function displayResults(response, url) {
-          console.log("Erhaltene Analyseergebnisse:", response); // Debug-Logging
+          console.log("Zeige Analyseergebnisse an:", response); // Debug-Logging
 
           let html = `
               <div class="alert alert-success">
@@ -267,6 +295,91 @@
           }
 
           return insights;
+      }
+/**
+ * Erstellt einen dynamischen Kreis-Score mit Prozentanzeige
+ * @param {number|string} score - Der Score-Wert (0-100)
+ * @param {string} label - Das Label für den Score
+ */
+function createScoreHTML(score, label) {
+    const scoreClass = getScoreClass(score);
+    const scoreValue = (score === 'N/A' || isNaN(score)) ? score : Math.round(score);
+
+    // Berechne die Rotation für den Kreisbalken
+    let rotation = 0;
+    if (scoreValue !== 'N/A' && !isNaN(scoreValue)) {
+        // 0 Grad: Leerer Kreis, 360 Grad: Voller Kreis
+        // Die -45 korrigiert die Startposition des Balkens (standardmäßig bei 3 Uhr)
+        rotation = ((scoreValue / 100) * 360) - 45;
+        if (rotation < -45) rotation = -45; // Verhindere negative Werte
+    }
+
+    return `
+        <div class="score-item" style="text-align: center; margin: 0 10px 20px;">
+            <div class="score-circle ${scoreClass}" style="--rotation: ${rotation}deg;">
+                <div class="score-value">${scoreValue}</div>
+            </div>
+            <div class="score-label">${label}</div>
+        </div>
+    `;
+}
+      // Funktion zum Anzeigen von Benachrichtigungen
+      function showAlert(message, type = 'info') {
+          const alertContainer = document.getElementById('alertContainer');
+
+          // Vorherige Benachrichtigungen entfernen
+          while (alertContainer.firstChild) {
+              alertContainer.removeChild(alertContainer.firstChild);
+          }
+
+          const alert = document.createElement('div');
+          alert.className = `alert alert-${type}`;
+          alert.textContent = message;
+
+          alertContainer.appendChild(alert);
+
+          // Nach 8 Sekunden automatisch ausblenden
+          setTimeout(() => {
+              alert.style.opacity = '0';
+              alert.style.transition = 'opacity 0.5s';
+
+              setTimeout(() => {
+                  if (alertContainer.contains(alert)) {
+                      alertContainer.removeChild(alert);
+                  }
+              }, 500);
+          }, 8000);
+      }
+
+      // Funktion zum Kürzen einer URL für die Anzeige
+      function truncateUrl(url) {
+          if (!url) return '';
+
+          // HTTP/HTTPS entfernen
+          let cleanUrl = url.replace(/^https?:\/\//, '');
+
+          // Wenn URL zu lang ist, kürzen
+          if (cleanUrl.length > 35) {
+              return cleanUrl.substring(0, 32) + '...';
+          }
+
+          return cleanUrl;
+      }
+
+      // Funktion zur Bestimmung der Score-Klasse
+      function getScoreClass(score) {
+          if (score === 'N/A' || isNaN(score)) {
+              return 'neutral';
+          }
+
+          const numScore = parseInt(score);
+          if (numScore >= 80) {
+              return 'success';
+          } else if (numScore >= 50) {
+              return 'warning';
+          } else {
+              return 'error';
+          }
       }
   });
 </script>
