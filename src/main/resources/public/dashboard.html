@@ -232,34 +232,44 @@
             loadWebsites();
         }
 
-        // Lade alle Websites
-        async function loadWebsites() {
-            websitesLoader.style.display = 'block';
-            websitesGrid.innerHTML = '';
+// Websites laden
+async function loadWebsites() {
+    try {
+        // Loader anzeigen
+        websitesLoader.style.display = 'block';
+        websitesGrid.innerHTML = '';
 
-            try {
-                const websites = await apiRequest('/websites');
+        // API-Anfrage senden
+        // Hier könnte der Fehler liegen - Variable nur einmal deklarieren
+        let websiteData = await apiRequest('/websites');
 
-                if (websites.length === 0) {
-                    websitesGrid.innerHTML = `
-                        <div style="grid-column: 1 / -1; text-align: center; padding: 30px;">
-                            <p>Noch keine Websites analysiert.</p>
-                            <a href="/" class="btn" style="margin-top: 15px;">Erste Analyse starten</a>
-                        </div>
-                    `;
-                } else {
-                    displayWebsites(websites);
-                }
+        // Debugging
+        console.log('Geladene Websites:', websiteData);
 
-                websitesLoader.style.display = 'none';
-            } catch (error) {
-                showAlert(error.message || 'Fehler beim Laden der Websites', 'error');
-                websitesLoader.style.display = 'none';
-            }
+        if (!websiteData || websiteData.length === 0) {
+            // Keine Websites vorhanden
+            websitesGrid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 30px;">
+                    <p>Noch keine Websites analysiert.</p>
+                    <a href="/" class="btn" style="margin-top: 15px;">Erste Analyse starten</a>
+                </div>
+            `;
+        } else {
+            // Websites anzeigen
+            displayWebsites(websiteData);
         }
 
-        // Websites anzeigen
+        // Loader ausblenden
+        websitesLoader.style.display = 'none';
+    } catch (error) {
+        console.error('Fehler beim Laden der Websites:', error);
+        showAlert(error.message || 'Fehler beim Laden der Websites', 'error');
+        websitesLoader.style.display = 'none';
+    }
+}        // Websites anzeigen
         function displayWebsites(websites) {
+            console.log('Anzeigen von Websites:', websites);
+
             websites.forEach(website => {
                 const websiteItem = document.createElement('div');
                 websiteItem.className = 'grid-item';
@@ -269,7 +279,7 @@
                     <h3 style="margin-bottom: 15px; word-break: break-all;">${truncateUrl(website.url)}</h3>
                     <p><strong>Erste Analyse:</strong> ${formatDate(website.firstAnalysisDate)}</p>
                     <p><strong>Letzte Analyse:</strong> ${formatDate(website.lastAnalysisDate)}</p>
-                    <p><strong>Anzahl Analysen:</strong> ${website.analysisResults.length}</p>
+                    <p><strong>Anzahl Analysen:</strong> ${website.analysisResults ? website.analysisResults.length : 'N/A'}</p>
                     ${createLatestScoresHTML(website)}
                 `;
 
@@ -280,7 +290,6 @@
                 websitesGrid.appendChild(websiteItem);
             });
         }
-
         // Zeigt die letzten Scores für eine Website in der Übersicht an
         function createLatestScoresHTML(website) {
             // Suche das neueste Analyseergebnis
@@ -596,12 +605,12 @@ function createScoreHTML(score, label) {
 
         // SEO-Details anzeigen
         function displaySeoDetails(seoResult) {
-            seoDetails.innerHTML = '';
+    seoDetails.innerHTML = '';
 
-            if (!seoResult) {
-                seoDetails.innerHTML = '<div style="grid-column: 1 / -1;">Keine SEO-Daten verfügbar</div>';
-                return;
-            }
+    if (!seoResult) {
+        seoDetails.innerHTML = '<div style="grid-column: 1 / -1;">Keine SEO-Daten verfügbar</div>';
+        return;
+    }
 
             // Detail-Items erstellen
             createDetailItem(seoDetails, 'Titel-Länge', `${seoResult.titleLength} Zeichen`);

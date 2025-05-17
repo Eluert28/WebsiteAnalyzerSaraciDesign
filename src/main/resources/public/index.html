@@ -254,6 +254,18 @@
       function generateInsights(response) {
           const insights = [];
 
+      // Canonical-Tag-Erkenntnisse
+      if (!response.seoResult.canonicalUrl) {
+          insights.push('Die Website hat kein Canonical-Tag, was zu Problemen mit doppeltem Inhalt führen kann.');
+      } else if (!response.seoResult.canonicalUrlAbsolute) {
+          insights.push('Das Canonical-Tag verwendet eine relative URL, was nicht empfohlen wird.');
+      }
+
+      // Strukturierte Daten-Erkenntnisse
+      if (!response.seoResult.structuredDataPresent) {
+          insights.push('Die Website verwendet keine strukturierten Daten, die für Rich Snippets in Suchergebnissen wichtig sind.');
+      }
+
           // SEO-Erkenntnisse
           if (response.seoResult) {
               if (response.seoResult.titleLength < 30 || response.seoResult.titleLength > 60) {

@@ -69,8 +69,7 @@ public class DatabaseConfig {
                         "FOREIGN KEY (website_id) REFERENCES websites(id)" +
                         ")"
         );
-
-        // SEO-Ergebnisse-Tabelle
+        // Die SEO-Ergebnisse-Tabelle aktualisieren
         connection.createStatement().execute(
                 "CREATE TABLE IF NOT EXISTS seo_results (" +
                         "analysis_id INTEGER PRIMARY KEY, " +
@@ -89,6 +88,15 @@ public class DatabaseConfig {
                         "internal_links INTEGER, " +
                         "external_links INTEGER, " +
                         "score INTEGER, " +
+                        "canonical_url TEXT, " +
+                        "canonical_url_absolute BOOLEAN, " +
+                        "canonical_url_self_referential BOOLEAN, " +
+                        "structured_data_present BOOLEAN, " +
+                        "structured_data_count INTEGER, " +
+                        "jsonld_count INTEGER, " +
+                        "microdata_count INTEGER, " +
+                        "rdfa_count INTEGER, " +
+                        "schema_types TEXT, " +
                         "FOREIGN KEY (analysis_id) REFERENCES analysis_results(id)" +
                         ")"
         );

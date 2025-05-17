@@ -12,6 +12,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
 
+import java.util.List;
+import com.saraci.websiteanalyzer.model.AnalysisResult;
+import com.saraci.websiteanalyzer.model.SeoResult;
+import com.saraci.websiteanalyzer.model.Website;
+import com.saraci.websiteanalyzer.repository.AnalysisResultRepository;
+import com.saraci.websiteanalyzer.repository.WebsiteRepository;
+
 import static spark.Spark.*;
 
 /**
@@ -56,6 +63,8 @@ public class WebsiteAnalyzer {
 
             logger.info("Website Analyzer gestartet: http://localhost:" + PORT);
 
+            testLatestResults();
+
             // Füge einen Shutdown-Hook hinzu, um Ressourcen freizugeben
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 logger.info("Anwendung wird heruntergefahren...");
@@ -68,7 +77,59 @@ public class WebsiteAnalyzer {
             e.printStackTrace();
         }
     }
+    private static void testLatestResults() {
+        try {
+            // Kurze Verzögerung, damit der Server starten kann
+            Thread.sleep(2000);
 
+            logger.info("=== STARTE TEST DER NEUEN FUNKTIONEN ===");
+
+            WebsiteRepository websiteRepo = AppConfig.getInstance().getWebsiteRepository();
+            AnalysisResultRepository repo = AppConfig.getInstance().getAnalysisResultRepository();
+
+            // Alle Websites abrufen
+            List<Website> websites = websiteRepo.findAll();
+            if (websites.isEmpty()) {
+                logger.info("Keine Websites in der Datenbank gefunden. Führen Sie zuerst eine Analyse durch.");
+                return;
+            }
+
+            // Für jede Website die neuesten Ergebnisse prüfen
+            for (Website website : websites) {
+                logger.info("Prüfe Website: " + website.getUrl());
+
+                List<AnalysisResult> results = repo.findByWebsiteId(website.getId());
+                if (results.isEmpty()) {
+                    logger.info("Keine Analyseergebnisse für diese Website gefunden.");
+                    continue;
+                }
+
+                AnalysisResult latestResult = results.get(0);
+                SeoResult seo = latestResult.getSeoResult();
+
+                if (seo != null) {
+                    logger.info("=== TEST: Canonical-Tag-Informationen ===");
+                    logger.info("Absolute URL: " + seo.isCanonicalUrlAbsolute());
+                    logger.info("Selbstreferenzierend: " + seo.isCanonicalUrlSelfReferential());
+
+                    logger.info("=== TEST: Strukturierte Daten ===");
+                    logger.info("Strukturierte Daten vorhanden: " + seo.isStructuredDataPresent());
+                    logger.info("Anzahl strukturierter Daten: " + seo.getStructuredDataCount());
+                    logger.info("JSON-LD: " + seo.getJsonLdCount());
+                    logger.info("Microdata: " + seo.getMicrodataCount());
+                    logger.info("RDFa: " + seo.getRdfaCount());
+                    logger.info("Schema-Typen: " + seo.getSchemaTypes());
+                } else {
+                    logger.info("Keine SEO-Ergebnisse für diese Website gefunden.");
+                }
+            }
+
+            logger.info("=== TEST ABGESCHLOSSEN ===");
+        } catch (Exception e) {
+            logger.severe("Fehler beim Testen der Ergebnisse: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
     /**
      * Initialisiert den Spark-Webserver
      */
@@ -134,7 +195,6 @@ public class WebsiteAnalyzer {
             response.header("Access-Control-Allow-Credentials", "true");
         });
     }
-
     /**
      * Richtet die Exception-Handler ein
      */

@@ -102,8 +102,10 @@ public class AnalysisResultRepositoryImpl implements AnalysisResultRepository {
         String sql = "INSERT INTO seo_results " +
                 "(analysis_id, title, title_length, description, description_length, keywords, " +
                 "h1_count, h2_count, h3_count, images_total, images_with_alt, images_without_alt, " +
-                "alt_image_percentage, internal_links, external_links, score) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "alt_image_percentage, internal_links, external_links, score, " +
+                "canonical_url, canonical_url_absolute, canonical_url_self_referential, " +
+                "structured_data_present, structured_data_count, jsonld_count, microdata_count, rdfa_count, schema_types) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setLong(1, analysisId);
@@ -122,6 +124,18 @@ public class AnalysisResultRepositoryImpl implements AnalysisResultRepository {
             pstmt.setInt(14, result.getInternalLinks());
             pstmt.setInt(15, result.getExternalLinks());
             pstmt.setInt(16, result.getScore());
+
+            // Neue Felder für Canonical-Tags
+            pstmt.setBoolean(18, result.isCanonicalUrlAbsolute());
+            pstmt.setBoolean(19, result.isCanonicalUrlSelfReferential());
+
+            // Neue Felder für strukturierte Daten
+            pstmt.setBoolean(20, result.isStructuredDataPresent());
+            pstmt.setInt(21, result.getStructuredDataCount());
+            pstmt.setInt(22, result.getJsonLdCount());
+            pstmt.setInt(23, result.getMicrodataCount());
+            pstmt.setInt(24, result.getRdfaCount());
+            pstmt.setString(25, result.getSchemaTypes());
 
             pstmt.executeUpdate();
             result.setAnalysisId(analysisId);
@@ -314,6 +328,12 @@ public class AnalysisResultRepositoryImpl implements AnalysisResultRepository {
 
             if (rs.next()) {
                 SeoResult result = new SeoResult();
+                result.setStructuredDataPresent(rs.getBoolean("structured_data_present"));
+                result.setStructuredDataCount(rs.getInt("structured_data_count"));
+                result.setJsonLdCount(rs.getInt("jsonld_count"));
+                result.setMicrodataCount(rs.getInt("microdata_count"));
+                result.setRdfaCount(rs.getInt("rdfa_count"));
+                result.setSchemaTypes(rs.getString("schema_types"));
                 result.setAnalysisId(rs.getLong("analysis_id"));
                 result.setTitle(rs.getString("title"));
                 result.setTitleLength(rs.getInt("title_length"));

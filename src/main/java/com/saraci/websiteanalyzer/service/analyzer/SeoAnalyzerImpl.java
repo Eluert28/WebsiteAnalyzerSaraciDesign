@@ -3,10 +3,15 @@ package com.saraci.websiteanalyzer.service.analyzer;
 import com.saraci.websiteanalyzer.model.SeoResult;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;  // Diesen Import hinzufügen
 import org.jsoup.select.Elements;
 
 import java.util.logging.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 /**
  * Implementierung des SEO-Analyzers mit Jsoup.
  */
@@ -54,6 +59,10 @@ public class SeoAnalyzerImpl implements SeoAnalyzer {
         result.setDescriptionLength(description.length());
         result.setKeywords(keywords);
 
+        // Canonical-Tags analysieren (HIER den neuen Aufruf hinzufügen)
+        analyzeCanonicalTags(doc, result);
+        analyzeStructuredData(doc, result);
+
         // Überschriften analysieren
         result.setH1Count(doc.select("h1").size());
         result.setH2Count(doc.select("h2").size());
@@ -78,10 +87,6 @@ public class SeoAnalyzerImpl implements SeoAnalyzer {
         result.setInternalLinks(internalLinks);
         result.setExternalLinks(externalLinks);
 
-        // Canonical-URL extrahieren
-        String canonicalUrl = doc.select("link[rel=canonical]").attr("href");
-        result.setCanonicalUrl(canonicalUrl);
-
         // SEO-Score berechnen
         int score = result.calculateScore(); // Ensure this method exists and works correctly
         result.setScore(score);
@@ -98,5 +103,95 @@ public class SeoAnalyzerImpl implements SeoAnalyzer {
     @Override
     public SeoResult analyze(Document document, String url) {
         return analyzeDocument(document, url);
+    }
+    /**
+     * Analysiert strukturierte Daten (Schema.org) auf der Seite.
+     * @param doc Das zu analysierende Jsoup-Dokument
+     * @param result Das SeoResult-Objekt, das aktualisiert werden soll
+     */
+    private void analyzeStructuredData(Document doc, SeoResult result) {
+        // Prüfe auf JSON-LD Schema.org
+        Elements jsonldScripts = doc.select("script[type=application/ld+json]");
+        int jsonldCount = jsonldScripts.size();
+
+        // Prüfe auf Microdata Schema.org
+        Elements microdataElements = doc.select("[itemscope]");
+        int microdataCount = microdataElements.size();
+
+        // Prüfe auf RDFa Schema.org
+        Elements rdfaElements = doc.select("[property]");
+        int rdfaCount = rdfaElements.size();
+
+        // Gesamtzahl der strukturierten Datenelemente
+        int totalStructuredDataCount = jsonldCount + microdataCount + rdfaCount;
+
+        // Setze die Werte im SeoResult
+        result.setStructuredDataPresent(totalStructuredDataCount > 0);
+        result.setStructuredDataCount(totalStructuredDataCount);
+        result.setJsonLdCount(jsonldCount);
+        result.setMicrodataCount(microdataCount);
+        result.setRdfaCount(rdfaCount);
+
+        // Extrahiere Schema.org-Typen aus JSON-LD
+        List<String> schemaTypes = new ArrayList<>();
+        for (Element script : jsonldScripts) {
+            String json = script.html();
+            // Einfache Extraktion des "@type"-Werts
+            Matcher typeMatcher = Pattern.compile("\"@type\"\\s*:\\s*\"([^\"]+)\"").matcher(json);
+            while (typeMatcher.find()) {
+                schemaTypes.add(typeMatcher.group(1));
+            }
+        }
+
+        // Extrahiere Schema.org-Typen aus Microdata
+        for (Element element : microdataElements) {
+            String itemtype = element.attr("itemtype");
+            if (itemtype.contains("schema.org/")) {
+                // Extrahiere den Typ aus der URL
+                String type = itemtype.substring(itemtype.lastIndexOf("/") + 1);
+                if (!type.isEmpty()) {
+                    schemaTypes.add(type);
+                }
+            }
+        }
+
+        // Schema-Typen als kommagetrennte Liste speichern
+        if (!schemaTypes.isEmpty()) {
+            result.setSchemaTypes(String.join(", ", schemaTypes));
+        } else {
+            result.setSchemaTypes("");
+        }
+
+        logger.info("Strukturierte Daten analysiert: " + totalStructuredDataCount + " Elemente gefunden.");
+    }
+    /**
+     * Analysiert Canonical-Tags auf der Seite.
+     * @param doc Das zu analysierende Jsoup-Dokument
+     * @param result Das SeoResult-Objekt, das aktualisiert werden soll
+     */
+    private void analyzeCanonicalTags(Document doc, SeoResult result) {
+        // Suche nach dem Canonical-Tag
+        Element canonicalTag = doc.select("link[rel=canonical]").first();
+
+        if (canonicalTag != null) {
+            String canonicalUrl = canonicalTag.attr("href");
+            result.setCanonicalUrl(canonicalUrl);
+
+            // Prüfen, ob die kanonische URL absolut ist
+            boolean isAbsoluteUrl = canonicalUrl.startsWith("http://") || canonicalUrl.startsWith("https://");
+            result.setCanonicalUrlAbsolute(isAbsoluteUrl);
+
+            // Prüfen, ob die kanonische URL auf sich selbst verweist (Self-Referential)
+            boolean isSelfReferential = canonicalUrl.equals(result.getUrl()) ||
+                    (isAbsoluteUrl && canonicalUrl.endsWith(result.getUrl()));
+            result.setCanonicalUrlSelfReferential(isSelfReferential);
+
+            logger.info("Canonical-Tag gefunden: " + canonicalUrl);
+        } else {
+            result.setCanonicalUrl(null);
+            result.setCanonicalUrlAbsolute(false);
+            result.setCanonicalUrlSelfReferential(false);
+            logger.info("Kein Canonical-Tag gefunden");
+        }
     }
 }

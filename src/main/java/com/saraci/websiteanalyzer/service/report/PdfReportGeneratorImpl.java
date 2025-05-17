@@ -153,6 +153,9 @@ public class PdfReportGeneratorImpl implements PdfReportGenerator {
     /**
      * Fügt die Titelseite zum Dokument hinzu.
      */
+    /**
+     * Fügt die Titelseite zum Dokument hinzu.
+     */
     private void addTitlePage(PDDocument document, AnalysisResult result) throws Exception {
         PDPage page = document.getPage(0);
 
@@ -181,30 +184,30 @@ public class PdfReportGeneratorImpl implements PdfReportGenerator {
 
             // URL der Website
             drawCenteredText(contentStream, result.getUrl(), PDType1Font.HELVETICA, FONT_SIZE_SUBTITLE, yPosition);
-            yPosition -= FONT_SIZE_SUBTITLE * LINE_HEIGHT * 2;
+            yPosition -= FONT_SIZE_SUBTITLE * LINE_HEIGHT;
 
             // Trennlinie
             drawLine(contentStream, MARGIN, yPosition, pageWidth - MARGIN, yPosition, 1f, PRIMARY_COLOR);
-            yPosition -= 30;
+            yPosition -= 50; // Mehr Abstand nach der Linie
 
             // Scores visualisieren (als Kreisdiagramme)
             float centerX = pageWidth / 2;
-            float circleRadius = 60;
+            float circleRadius = 45; // Kleinere Kreise (war vorher 60)
             float circleSpacing = 30;
             float totalWidth = 3 * (2 * circleRadius) + 2 * circleSpacing;
             float startX = centerX - totalWidth / 2 + circleRadius;
 
             // SEO Score
             int seoScore = result.getSeoResult() != null ? result.getSeoResult().getScore() : 0;
-            drawScoreCircle(contentStream, document, startX, yPosition, circleRadius, seoScore, "SEO", SUCCESS_COLOR);
+            drawScoreCircle(contentStream, document, startX, yPosition, circleRadius, seoScore, "SEO");
 
             // Performance Score
             int perfScore = result.getPerformanceResult() != null ? result.getPerformanceResult().getLighthouseScore() : 0;
-            drawScoreCircle(contentStream, document, startX + 2 * circleRadius + circleSpacing, yPosition, circleRadius, perfScore, "Performance", WARNING_COLOR);
+            drawScoreCircle(contentStream, document, startX + 2 * circleRadius + circleSpacing, yPosition, circleRadius, perfScore, "Performance");
 
             // Security Score
             int secScore = result.getSecurityResult() != null ? result.getSecurityResult().getSecurityHeadersScore() : 0;
-            drawScoreCircle(contentStream, document, startX + 4 * circleRadius + 2 * circleSpacing, yPosition, circleRadius, secScore, "Sicherheit", ERROR_COLOR);
+            drawScoreCircle(contentStream, document, startX + 4 * circleRadius + 2 * circleSpacing, yPosition, circleRadius, secScore, "Sicherheit");
 
             yPosition -= 2 * circleRadius + 50;
 
@@ -217,9 +220,6 @@ public class PdfReportGeneratorImpl implements PdfReportGenerator {
         }
     }
 
-    /**
-     * Fügt ein Inhaltsverzeichnis zum Dokument hinzu.
-     */
     private void addTableOfContents(PDDocument document) throws Exception {
         PDPage page = document.getPage(1);
 
@@ -361,7 +361,7 @@ public class PdfReportGeneratorImpl implements PdfReportGenerator {
             yPosition -= calculateTextHeight(introText, PDType1Font.HELVETICA, FONT_SIZE_TEXT, pageWidth - 2 * MARGIN) + 20;
 
             // Gesamtscore als großes Element
-            drawLargeScore(contentStream, seoResult.getScore(), "SEO-Score", MARGIN, yPosition, SUCCESS_COLOR);
+            drawLargeScore(contentStream, seoResult.getScore(), "SEO-Score", MARGIN, yPosition);
             yPosition -= 100;
 
             // Meta-Informationen
@@ -416,8 +416,6 @@ public class PdfReportGeneratorImpl implements PdfReportGenerator {
                     {"Gesamtzahl", String.valueOf(seoResult.getInternalLinks() + seoResult.getExternalLinks())}
             };
 
-            yPosition = drawTable(contentStream, linksData, columnWidths, MARGIN, yPosition, 30);
-
             // Fußzeile
             addFooter(contentStream);
         }
@@ -453,7 +451,7 @@ public class PdfReportGeneratorImpl implements PdfReportGenerator {
             yPosition -= calculateTextHeight(introText, PDType1Font.HELVETICA, FONT_SIZE_TEXT, pageWidth - 2 * MARGIN) + 20;
 
             // Gesamtscore als großes Element
-            drawLargeScore(contentStream, perfResult.getLighthouseScore(), "Lighthouse Score", MARGIN, yPosition, WARNING_COLOR);
+            drawLargeScore(contentStream, perfResult.getLighthouseScore(), "Lighthouse Score", MARGIN, yPosition);
             yPosition -= 100;
 
             // Ladezeit als Balken
@@ -538,7 +536,7 @@ public class PdfReportGeneratorImpl implements PdfReportGenerator {
             yPosition -= calculateTextHeight(introText, PDType1Font.HELVETICA, FONT_SIZE_TEXT, pageWidth - 2 * MARGIN) + 20;
 
             // Gesamtscore als großes Element
-            drawLargeScore(contentStream, secResult.getSecurityHeadersScore(), "Sicherheits-Score", MARGIN, yPosition, ERROR_COLOR);
+            drawLargeScore(contentStream, secResult.getSecurityHeadersScore(), "Sicherheits-Score", MARGIN, yPosition);
             yPosition -= 100;
 
             // HTTPS-Status
@@ -866,12 +864,21 @@ public class PdfReportGeneratorImpl implements PdfReportGenerator {
         contentStream.showText(pageText);
         contentStream.endText();
     }
-
     /**
      * Zeichnet einen Kreis-Score.
      * Alternative Implementierung ohne addEllipse
      */
-    private void drawScoreCircle(PDPageContentStream contentStream, PDDocument document, float x, float y, float radius, int score, String label, Color color) throws IOException {
+    private void drawScoreCircle(PDPageContentStream contentStream, PDDocument document, float x, float y, float radius, int score, String label) throws IOException {
+        // Bestimme die Farbe basierend auf dem Score
+        Color color;
+        if (score >= 80) {
+            color = SUCCESS_COLOR; // Grün für gute Scores
+        } else if (score >= 50) {
+            color = WARNING_COLOR; // Gelb für mittlere Scores
+        } else {
+            color = ERROR_COLOR;   // Rot für schlechte Scores
+        }
+
         // Hintergrund-Kreis
         contentStream.setNonStrokingColor(new Color(230, 230, 230));
 
@@ -1011,7 +1018,17 @@ public class PdfReportGeneratorImpl implements PdfReportGenerator {
     /**
      * Zeichnet einen großen Score.
      */
-    private void drawLargeScore(PDPageContentStream contentStream, int score, String label, float x, float y, Color color) throws IOException {
+    private void drawLargeScore(PDPageContentStream contentStream, int score, String label, float x, float y) throws IOException {
+        // Bestimme die Farbe basierend auf dem Score
+        Color color;
+        if (score >= 80) {
+            color = SUCCESS_COLOR; // Grün für gute Scores
+        } else if (score >= 50) {
+            color = WARNING_COLOR; // Gelb für mittlere Scores
+        } else {
+            color = ERROR_COLOR;   // Rot für schlechte Scores
+        }
+
         // Score-Kreis
         float radius = 40;
         float centerX = x + radius;

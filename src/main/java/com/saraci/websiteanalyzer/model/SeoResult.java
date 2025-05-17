@@ -22,7 +22,82 @@ public class SeoResult {
     private int externalLinks;
     private int score;
     private String canonicalUrl;  // Aus dem anderen Code ersichtlich, dass dies benötigt wird
+    // Neue Felder für strukturierte Daten
+    private boolean structuredDataPresent;
+    private int structuredDataCount;
+    private int jsonLdCount;
+    private int microdataCount;
+    private int rdfaCount;
+    private String schemaTypes;
 
+    // Getter und Setter
+    public boolean isStructuredDataPresent() {
+        return structuredDataPresent;
+    }
+
+    public void setStructuredDataPresent(boolean structuredDataPresent) {
+        this.structuredDataPresent = structuredDataPresent;
+    }
+
+    public int getStructuredDataCount() {
+        return structuredDataCount;
+    }
+
+    public void setStructuredDataCount(int structuredDataCount) {
+        this.structuredDataCount = structuredDataCount;
+    }
+
+    public int getJsonLdCount() {
+        return jsonLdCount;
+    }
+
+    public void setJsonLdCount(int jsonLdCount) {
+        this.jsonLdCount = jsonLdCount;
+    }
+
+    public int getMicrodataCount() {
+        return microdataCount;
+    }
+
+    public void setMicrodataCount(int microdataCount) {
+        this.microdataCount = microdataCount;
+    }
+
+    public int getRdfaCount() {
+        return rdfaCount;
+    }
+
+    public void setRdfaCount(int rdfaCount) {
+        this.rdfaCount = rdfaCount;
+    }
+
+    public String getSchemaTypes() {
+        return schemaTypes;
+    }
+
+    public void setSchemaTypes(String schemaTypes) {
+        this.schemaTypes = schemaTypes;
+    }
+
+    // In SeoResult.java
+    private boolean canonicalUrlAbsolute;
+    private boolean canonicalUrlSelfReferential;
+
+    public boolean isCanonicalUrlAbsolute() {
+        return canonicalUrlAbsolute;
+    }
+
+    public void setCanonicalUrlAbsolute(boolean canonicalUrlAbsolute) {
+        this.canonicalUrlAbsolute = canonicalUrlAbsolute;
+    }
+
+    public boolean isCanonicalUrlSelfReferential() {
+        return canonicalUrlSelfReferential;
+    }
+
+    public void setCanonicalUrlSelfReferential(boolean canonicalUrlSelfReferential) {
+        this.canonicalUrlSelfReferential = canonicalUrlSelfReferential;
+    }
     // Konstruktoren
     public SeoResult() {
     }
@@ -165,11 +240,6 @@ public class SeoResult {
         this.score = score;
     }
 
-    // Getter und Setter für canonicalUrl
-    public String getCanonicalUrl() {
-        return canonicalUrl;
-    }
-
     public void setCanonicalUrl(String canonicalUrl) {
         this.canonicalUrl = canonicalUrl;
     }
@@ -180,7 +250,7 @@ public class SeoResult {
      */
     public int calculateScore() {
         int score = 0;
-        int totalPoints = 5;
+        int totalPoints = 7;
 
         // Titel-Score (optimal: 30-60 Zeichen)
         if (title != null && !title.isEmpty()) {
@@ -210,7 +280,16 @@ public class SeoResult {
         if (internalLinks > 0 && externalLinks > 0) {
             score++;
         }
-
+        // Canonical-Tag Score (optimal: vorhanden, absolut und selbstreferenzierend)
+        if (canonicalUrl != null && !canonicalUrl.isEmpty()) {
+            if (canonicalUrlAbsolute && canonicalUrlSelfReferential) {
+                score++;
+            }
+        }
+        // Strukturierte Daten Score (optimal: mindestens ein strukturiertes Datenelement)
+        if (structuredDataPresent && structuredDataCount > 0) {
+            score++;
+        }
         // Berechne Prozentsatz
         return (int) Math.round((double) score / totalPoints * 100);
     }

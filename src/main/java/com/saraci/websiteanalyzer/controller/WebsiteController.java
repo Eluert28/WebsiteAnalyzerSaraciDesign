@@ -37,6 +37,7 @@ public class WebsiteController implements Controller {
 
             try {
                 List<Website> websites = websiteRepository.findAll();
+                logger.info("Websites abgerufen: " + websites.size());
                 return JsonUtil.toJson(websites);
             } catch (Exception e) {
                 logger.severe("Fehler beim Abrufen der Websites: " + e.getMessage());
