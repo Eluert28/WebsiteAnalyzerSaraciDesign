@@ -12,13 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
 
-import java.util.List;
-import com.saraci.websiteanalyzer.model.AnalysisResult;
-import com.saraci.websiteanalyzer.model.SeoResult;
-import com.saraci.websiteanalyzer.model.Website;
-import com.saraci.websiteanalyzer.repository.AnalysisResultRepository;
-import com.saraci.websiteanalyzer.repository.WebsiteRepository;
-
 import static spark.Spark.*;
 
 /**
@@ -26,7 +19,7 @@ import static spark.Spark.*;
  */
 public class WebsiteAnalyzer {
     private static final Logger logger = Logger.getLogger(WebsiteAnalyzer.class.getName());
-    private static final int PORT = 8080;
+    private static final int DEFAULT_PORT = 8080;
 
     public static void main(String[] args) {
         try {
@@ -61,9 +54,11 @@ public class WebsiteAnalyzer {
             ControllerRegistry controllerRegistry = new ControllerRegistry(appConfig, schedulerService);
             controllerRegistry.registerAllRoutes();
 
-            logger.info("Website Analyzer gestartet: http://localhost:" + PORT);
-
-            testLatestResults();
+            // Hole den verwendeten Port für die Logging-Meldung
+            int port = port();
+            logger.info("Website Analyzer gestartet: http://localhost:" + port);
+            logger.info("  - Status-Endpunkt: http://localhost:" + port + "/status");
+            logger.info("  - Hauptseite: http://localhost:" + port + "/");
 
             // Füge einen Shutdown-Hook hinzu, um Ressourcen freizugeben
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -77,65 +72,16 @@ public class WebsiteAnalyzer {
             e.printStackTrace();
         }
     }
-    private static void testLatestResults() {
-        try {
-            // Kurze Verzögerung, damit der Server starten kann
-            Thread.sleep(2000);
 
-            logger.info("=== STARTE TEST DER NEUEN FUNKTIONEN ===");
-
-            WebsiteRepository websiteRepo = AppConfig.getInstance().getWebsiteRepository();
-            AnalysisResultRepository repo = AppConfig.getInstance().getAnalysisResultRepository();
-
-            // Alle Websites abrufen
-            List<Website> websites = websiteRepo.findAll();
-            if (websites.isEmpty()) {
-                logger.info("Keine Websites in der Datenbank gefunden. Führen Sie zuerst eine Analyse durch.");
-                return;
-            }
-
-            // Für jede Website die neuesten Ergebnisse prüfen
-            for (Website website : websites) {
-                logger.info("Prüfe Website: " + website.getUrl());
-
-                List<AnalysisResult> results = repo.findByWebsiteId(website.getId());
-                if (results.isEmpty()) {
-                    logger.info("Keine Analyseergebnisse für diese Website gefunden.");
-                    continue;
-                }
-
-                AnalysisResult latestResult = results.get(0);
-                SeoResult seo = latestResult.getSeoResult();
-
-                if (seo != null) {
-                    logger.info("=== TEST: Canonical-Tag-Informationen ===");
-                    logger.info("Absolute URL: " + seo.isCanonicalUrlAbsolute());
-                    logger.info("Selbstreferenzierend: " + seo.isCanonicalUrlSelfReferential());
-
-                    logger.info("=== TEST: Strukturierte Daten ===");
-                    logger.info("Strukturierte Daten vorhanden: " + seo.isStructuredDataPresent());
-                    logger.info("Anzahl strukturierter Daten: " + seo.getStructuredDataCount());
-                    logger.info("JSON-LD: " + seo.getJsonLdCount());
-                    logger.info("Microdata: " + seo.getMicrodataCount());
-                    logger.info("RDFa: " + seo.getRdfaCount());
-                    logger.info("Schema-Typen: " + seo.getSchemaTypes());
-                } else {
-                    logger.info("Keine SEO-Ergebnisse für diese Website gefunden.");
-                }
-            }
-
-            logger.info("=== TEST ABGESCHLOSSEN ===");
-        } catch (Exception e) {
-            logger.severe("Fehler beim Testen der Ergebnisse: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
     /**
      * Initialisiert den Spark-Webserver
      */
     private static void initializeServer() {
-        // Setze den Port
-        port(PORT);
+        // Setze den Port - lese den Port aus der Umgebungsvariablen oder verwende den Standardport
+        int port = Integer.parseInt(AppConfig.getEnv("PORT", String.valueOf(DEFAULT_PORT)));
+        port(port);
+
+        logger.info("Server wird auf Port " + port + " gestartet");
 
         // Statische Dateien aus dem resources/public-Verzeichnis bereitstellen
         staticFiles.location("/public");
@@ -145,6 +91,21 @@ public class WebsiteAnalyzer {
 
         // Exception Handler für API-Fehler
         setupExceptionHandling();
+
+        // Redirect von / zur index.html, falls die Standardseite nicht automatisch geladen wird
+        get("/", (req, res) -> {
+            res.redirect("/index.html");
+            return null;
+        });
+
+        // Einfacher Endpoint zum Testen, ob der Server läuft
+        get("/status", (req, res) -> {
+            res.type("application/json");
+            return JsonUtil.toJson(JsonUtil.success("Website Analyzer läuft!",
+                    "version", "1.0",
+                    "timestamp", System.currentTimeMillis(),
+                    "status", "online"));
+        });
     }
 
     /**
@@ -195,6 +156,7 @@ public class WebsiteAnalyzer {
             response.header("Access-Control-Allow-Credentials", "true");
         });
     }
+
     /**
      * Richtet die Exception-Handler ein
      */

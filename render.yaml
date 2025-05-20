@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: website-analyzer
+    env: docker
+    plan: free
+    healthCheckPath: /status
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: EMAIL_HOST
+        sync: false
+      - key: EMAIL_PORT
+        sync: false
+      - key: EMAIL_USERNAME
+        sync: false
+      - key: EMAIL_PASSWORD
+        sync: false
+      - key: ENABLE_SCHEDULER_STARTUP
+        value: false

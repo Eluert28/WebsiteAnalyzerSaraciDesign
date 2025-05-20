@@ -36,6 +36,9 @@ public class ControllerRegistry {
         controllers.add(new WebsiteController(websiteRepository, analysisResultRepository));
         controllers.add(new ScheduleController(scheduleRepository, websiteRepository, schedulerService));
 
+        // Neuen Health-Check-Controller hinzufügen
+        controllers.add(new HealthCheckController(websiteRepository));
+
         logger.info("Controller-Registry initialisiert mit " + controllers.size() + " Controllern");
     }
 
