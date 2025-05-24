@@ -1,0 +1,1674 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Einstellungen - Website Analyzer</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+</head>
+<body>
+<header>
+  <div class="container header-content">
+    <div class="logo">
+      <img src="images/logo.png" alt="Saraci Design Logo">
+      <div class="logo-text">
+        <h1>Website Analyzer</h1>
+        <p>Einstellungen</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="container">
+    <div class="nav-container">
+      <a href="/" class="nav-link">Analyse-Tool</a>
+      <a href="/dashboard.html" class="nav-link">Dashboard</a>
+      <a href="/leads.html" class="nav-link">Leads</a>
+      <a href="/email.html" class="nav-link">E-Mail-Generator</a>
+      <a href="/reports.html" class="nav-link">Berichte</a>
+      <a href="/settings.html" class="nav-link active">Einstellungen</a>
+    </div>
+  </div>
+</nav>
+
+<div class="main-content">
+  <div class="container">
+    <div id="alertContainer"></div>
+
+    <!-- Tab-Navigation -->
+    <div class="settings-nav">
+      <button class="settings-nav-item active" data-tab="general">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        Allgemein
+      </button>
+      <button class="settings-nav-item" data-tab="email">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+        E-Mail & SMTP
+      </button>
+      <button class="settings-nav-item" data-tab="templates">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        E-Mail-Vorlagen
+      </button>
+      <button class="settings-nav-item" data-tab="branding">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+        Branding
+      </button>
+      <button class="settings-nav-item" data-tab="api">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+        API
+      </button>
+      <button class="settings-nav-item" data-tab="backup">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>
+        Backup & Import
+      </button>
+    </div>
+
+    <!-- Tab-Inhalte -->
+    <div class="settings-content">
+      <!-- Allgemeine Einstellungen -->
+      <div class="settings-tab active" id="generalTab">
+        <div class="card">
+          <div class="card-header">
+            <h2>Allgemeine Einstellungen</h2>
+          </div>
+          <div class="card-body">
+            <form id="generalSettingsForm">
+              <div class="form-group">
+                <label for="companyName">Unternehmen</label>
+                <input type="text" id="companyName" name="companyName" placeholder="Saraci Design">
+              </div>
+              <div class="form-group">
+                <label for="defaultLanguage">Standardsprache</label>
+                <select id="defaultLanguage" name="defaultLanguage">
+                  <option value="de">Deutsch</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="dateFormat">Datumsformat</label>
+                <select id="dateFormat" name="dateFormat">
+                  <option value="dd.MM.yyyy">DD.MM.YYYY</option>
+                  <option value="MM/dd/yyyy">MM/DD/YYYY</option>
+                  <option value="yyyy-MM-dd">YYYY-MM-DD</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="reportsPath">Speicherort für Berichte</label>
+                <input type="text" id="reportsPath" name="reportsPath" placeholder="/path/to/reports">
+                <span class="input-hint">Absoluter Pfad zum Speichern der generierten Berichte</span>
+              </div>
+              <div class="form-group">
+                <label>Automatische Aktualisierungen</label>
+                <div class="checkbox-container">
+                  <input type="checkbox" id="autoCheckUpdates" name="autoCheckUpdates">
+                  <label for="autoCheckUpdates">Nach Updates suchen</label>
+                </div>
+              </div>
+              <button type="submit" class="btn">Einstellungen speichern</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- E-Mail & SMTP Einstellungen -->
+      <div class="settings-tab" id="emailTab">
+        <div class="card">
+          <div class="card-header">
+            <h2>E-Mail-Einstellungen</h2>
+          </div>
+          <div class="card-body">
+            <form id="emailSettingsForm">
+              <h3>Absender-Informationen</h3>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="senderName">Absendername</label>
+                  <input type="text" id="senderName" name="senderName" placeholder="Saraci Design">
+                </div>
+                <div class="form-group">
+                  <label for="senderEmail">Absender-E-Mail</label>
+                  <input type="email" id="senderEmail" name="senderEmail" placeholder="info@saraci-design.de">
+                </div>
+              </div>
+
+              <h3>SMTP-Server</h3>
+              <div class="form-group">
+                <label for="smtpHost">SMTP-Server</label>
+                <input type="text" id="smtpHost" name="smtpHost" placeholder="smtp.example.com">
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="smtpPort">Port</label>
+                  <input type="number" id="smtpPort" name="smtpPort" placeholder="587">
+                </div>
+                <div class="form-group">
+                  <label for="smtpSecurity">Sicherheit</label>
+                  <select id="smtpSecurity" name="smtpSecurity">
+                    <option value="tls">TLS</option>
+                    <option value="ssl">SSL</option>
+                    <option value="none">Keine</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="smtpUsername">Benutzername</label>
+                <input type="text" id="smtpUsername" name="smtpUsername" placeholder="username">
+              </div>
+              <div class="form-group">
+                <label for="smtpPassword">Passwort</label>
+                <input type="password" id="smtpPassword" name="smtpPassword" placeholder="••••••••">
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn">Einstellungen speichern</button>
+                <button type="button" id="testSmtpBtn" class="btn btn-secondary">Verbindung testen</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- E-Mail-Vorlagen -->
+      <div class="settings-tab" id="templatesTab">
+        <div class="card">
+          <div class="card-header">
+            <h2>E-Mail-Vorlagen</h2>
+            <button id="addTemplateBtn" class="btn btn-secondary btn-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Neue Vorlage
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="loader-container" id="templatesLoader" style="display: none;">
+              <div class="loader"></div>
+              <p>Vorlagen werden geladen...</p>
+            </div>
+
+            <div class="templates-list" id="templatesList"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Branding Einstellungen -->
+      <div class="settings-tab" id="brandingTab">
+        <div class="card">
+          <div class="card-header">
+            <h2>Branding-Einstellungen</h2>
+          </div>
+          <div class="card-body">
+            <form id="brandingSettingsForm">
+              <div class="form-group">
+                <label for="logoUpload">Logo</label>
+                <div class="file-upload">
+                  <div class="preview-container">
+                    <img id="logoPreview" src="images/logo.png" alt="Logo Vorschau" class="logo-preview">
+                  </div>
+                  <div class="upload-controls">
+                    <input type="file" id="logoUpload" name="logo" accept="image/*" style="display: none;">
+                    <button type="button" id="logoUploadBtn" class="btn btn-secondary">Logo auswählen</button>
+                    <button type="button" id="logoRemoveBtn" class="btn btn-secondary">Entfernen</button>
+                    <span class="input-hint">Empfohlene Größe: 200x60 Pixel, transparenter Hintergrund</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="accentColor">Akzentfarbe</label>
+                <div class="color-picker-container">
+                  <input type="color" id="accentColor" name="accentColor" value="#e81818">
+                  <input type="text" id="accentColorHex" value="#e81818" class="color-hex-input">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="reportFooter">Berichtsfußzeile</label>
+                <textarea id="reportFooter" name="reportFooter" rows="3" placeholder="© 2025 Saraci Design. Alle Rechte vorbehalten."></textarea>
+              </div>
+
+              <button type="submit" class="btn">Branding speichern</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- API Einstellungen -->
+      <div class="settings-tab" id="apiTab">
+        <div class="card">
+          <div class="card-header">
+            <h2>API-Einstellungen</h2>
+          </div>
+          <div class="card-body">
+            <form id="apiSettingsForm">
+              <div class="form-group">
+                <label>API-Zugriff</label>
+                <div class="checkbox-container">
+                  <input type="checkbox" id="enableApi" name="enableApi">
+                  <label for="enableApi">API-Zugriff aktivieren</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="apiKey">API-Schlüssel</label>
+                <div class="api-key-container">
+                  <input type="text" id="apiKey" value="" readonly>
+                  <button type="button" id="generateApiKeyBtn" class="btn btn-secondary">Neu generieren</button>
+                  <button type="button" id="copyApiKeyBtn" class="btn btn-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  </button>
+                </div>
+                <span class="input-hint">Dieser Schlüssel wird für API-Zugriffe benötigt. Teilen Sie ihn nicht mit Unbefugten.</span>
+              </div>
+
+              <h3>OpenAI API für E-Mail-Generierung</h3>
+              <div class="form-group">
+                <label for="openaiApiKey">OpenAI API-Schlüssel</label>
+                <input type="password" id="openaiApiKey" name="openaiApiKey" placeholder="sk-...">
+              </div>
+              <div class="form-group">
+                <label for="openaiModel">Modell</label>
+                <select id="openaiModel" name="openaiModel">
+                  <option value="gpt-4">GPT-4</option>
+                  <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                  <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                </select>
+              </div>
+
+              <button type="submit" class="btn">API-Einstellungen speichern</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Backup & Import -->
+      <div class="settings-tab" id="backupTab">
+        <div class="card">
+          <div class="card-header">
+            <h2>Backup & Import</h2>
+          </div>
+          <div class="card-body">
+            <div class="settings-section">
+              <h3>Datenbank-Backup</h3>
+              <p>Erstellen Sie ein Backup Ihrer Daten, um diese später wiederherstellen zu können.</p>
+              <div class="action-buttons">
+                <button id="createBackupBtn" class="btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                  Backup erstellen
+                </button>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <h3>Daten importieren</h3>
+              <p>Importieren Sie ein zuvor erstelltes Backup, um Ihre Daten wiederherzustellen.</p>
+              <div class="import-controls">
+                <input type="file" id="importFile" accept=".zip,.sql,.json" style="display: none;">
+                <button id="importFileBtn" class="btn btn-secondary">Backup-Datei auswählen</button>
+                <span id="selectedFileInfo" class="selected-file-info">Keine Datei ausgewählt</span>
+              </div>
+              <div class="checkbox-container" style="margin-top: 15px;">
+                <input type="checkbox" id="overwriteExisting" name="overwriteExisting">
+                <label for="overwriteExisting">Bestehende Daten überschreiben</label>
+              </div>
+              <button id="startImportBtn" class="btn" disabled>Import starten</button>
+            </div>
+
+            <div class="settings-section">
+              <h3>Backup-Historie</h3>
+              <div class="table-container">
+                <table id="backupHistoryTable">
+                  <thead>
+                  <tr>
+                    <th>Datum</th>
+                    <th>Dateigröße</th>
+                    <th>Typ</th>
+                    <th>Aktionen</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <!-- Backup-Einträge werden hier per JavaScript eingefügt -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vorlage erstellen/bearbeiten Modal -->
+    <div id="templateModal" class="modal">
+      <div class="modal-content modal-lg">
+        <div class="modal-header">
+          <h2 id="templateModalTitle">Neue E-Mail-Vorlage erstellen</h2>
+          <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+          <form id="templateForm">
+            <input type="hidden" id="templateId">
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="templateName">Name*</label>
+                <input type="text" id="templateName" name="templateName" required>
+              </div>
+              <div class="form-group">
+                <label for="templateCategory">Kategorie</label>
+                <select id="templateCategory" name="templateCategory">
+                  <option value="initial">Erstansprache</option>
+                  <option value="followup">Follow-up</option>
+                  <option value="proposal">Angebot</option>
+                  <option value="thankyou">Danksagung</option>
+                  <option value="other">Sonstiges</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="templateDescription">Beschreibung</label>
+              <textarea id="templateDescription" name="templateDescription" rows="2"></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="templateLanguage">Sprache</label>
+                <select id="templateLanguage" name="templateLanguage">
+                  <option value="de">Deutsch</option>
+                  <option value="en">Englisch</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="templateTone">Tonfall</label>
+                <select id="templateTone" name="templateTone">
+                  <option value="formal">Formell</option>
+                  <option value="friendly">Freundlich</option>
+                  <option value="casual">Locker</option>
+                  <option value="professional">Professionell</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="templateSubject">Betreff*</label>
+              <input type="text" id="templateSubject" name="templateSubject" required>
+              <span class="input-hint">Sie können Variablen wie {{company}}, {{name}} oder {{website}} verwenden</span>
+            </div>
+
+            <div class="form-group">
+              <label for="templateBody">E-Mail-Text*</label>
+              <textarea id="templateBody" name="templateBody" rows="10" required></textarea>
+              <span class="input-hint">Sie können Variablen wie {{company}}, {{name}}, {{website}} verwenden</span>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn">Vorlage speichern</button>
+              <button type="button" id="cancelTemplateBtn" class="btn btn-secondary">Abbrechen</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- SMTP-Test Modal -->
+    <div id="smtpTestModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>SMTP-Verbindung testen</h2>
+          <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+          <form id="smtpTestForm">
+            <div class="form-group">
+              <label for="testEmailRecipient">Empfänger-E-Mail*</label>
+              <input type="email" id="testEmailRecipient" name="recipient" required>
+              <span class="input-hint">An diese Adresse wird eine Test-E-Mail gesendet</span>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn">Test durchführen</button>
+              <button type="button" id="cancelSmtpTestBtn" class="btn btn-secondary">Abbrechen</button>
+            </div>
+          </form>
+          <div class="test-result" id="smtpTestResult" style="display: none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="container footer-content">
+    <div class="footer-text">
+      &copy; 2025 Saraci Design. Alle Rechte vorbehalten.
+    </div>
+    <div class="footer-links">
+      <a href="/">Analyse-Tool</a>
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/leads.html">Leads</a>
+      <a href="/email.html">E-Mail-Generator</a>
+      <a href="/reports.html">Berichte</a>
+      <a href="/settings.html">Einstellungen</a>
+      <a href="https://saraci-design.de" target="_blank">Saraci Design</a>
+    </div>
+  </div>
+</footer>
+
+<script src="js/utils.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // DOM-Elemente für die Tab-Navigation
+    const tabButtons = document.querySelectorAll('.settings-nav-item');
+    const tabContents = document.querySelectorAll('.settings-tab');
+
+    // Allgemeine Einstellungen
+    const generalSettingsForm = document.getElementById('generalSettingsForm');
+
+    // E-Mail-Einstellungen
+    const emailSettingsForm = document.getElementById('emailSettingsForm');
+    const testSmtpBtn = document.getElementById('testSmtpBtn');
+
+    // E-Mail-Vorlagen
+    const templatesList = document.getElementById('templatesList');
+    const templatesLoader = document.getElementById('templatesLoader');
+    const addTemplateBtn = document.getElementById('addTemplateBtn');
+
+    // Vorlagen-Modal
+    const templateModal = document.getElementById('templateModal');
+    const templateForm = document.getElementById('templateForm');
+    const templateModalTitle = document.getElementById('templateModalTitle');
+    const templateId = document.getElementById('templateId');
+    const cancelTemplateBtn = document.getElementById('cancelTemplateBtn');
+
+    // SMTP-Test-Modal
+    const smtpTestModal = document.getElementById('smtpTestModal');
+    const smtpTestForm = document.getElementById('smtpTestForm');
+    const smtpTestResult = document.getElementById('smtpTestResult');
+    const cancelSmtpTestBtn = document.getElementById('cancelSmtpTestBtn');
+
+    // Branding-Einstellungen
+    const brandingSettingsForm = document.getElementById('brandingSettingsForm');
+    const logoUpload = document.getElementById('logoUpload');
+    const logoUploadBtn = document.getElementById('logoUploadBtn');
+    const logoRemoveBtn = document.getElementById('logoRemoveBtn');
+    const logoPreview = document.getElementById('logoPreview');
+    const accentColor = document.getElementById('accentColor');
+    const accentColorHex = document.getElementById('accentColorHex');
+
+    // API-Einstellungen
+    const apiSettingsForm = document.getElementById('apiSettingsForm');
+    const generateApiKeyBtn = document.getElementById('generateApiKeyBtn');
+    const copyApiKeyBtn = document.getElementById('copyApiKeyBtn');
+    const apiKey = document.getElementById('apiKey');
+
+    // Backup & Import
+    const createBackupBtn = document.getElementById('createBackupBtn');
+    const importFile = document.getElementById('importFile');
+    const importFileBtn = document.getElementById('importFileBtn');
+    const selectedFileInfo = document.getElementById('selectedFileInfo');
+    const startImportBtn = document.getElementById('startImportBtn');
+    const backupHistoryTable = document.getElementById('backupHistoryTable').querySelector('tbody');
+
+    // Event-Listener für Tab-Navigation
+    tabButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        // Aktiven Tab-Button setzen
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        this.classList.add('active');
+
+        // Aktiven Tab-Inhalt anzeigen
+        const tabId = this.getAttribute('data-tab') + 'Tab';
+        tabContents.forEach(content => content.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+
+    // Einstellungen laden beim Seitenaufruf
+    loadGeneralSettings();
+    loadEmailSettings();
+    loadTemplates();
+    loadBrandingSettings();
+    loadApiSettings();
+    loadBackupHistory();
+
+    // Event-Listener für Formulare
+    generalSettingsForm.addEventListener('submit', saveGeneralSettings);
+    emailSettingsForm.addEventListener('submit', saveEmailSettings);
+    templateForm.addEventListener('submit', saveTemplate);
+    brandingSettingsForm.addEventListener('submit', saveBrandingSettings);
+    apiSettingsForm.addEventListener('submit', saveApiSettings);
+
+    // Event-Listener für Buttons
+    testSmtpBtn.addEventListener('click', openSmtpTestModal);
+    addTemplateBtn.addEventListener('click', openAddTemplateModal);
+    cancelTemplateBtn.addEventListener('click', closeTemplateModal);
+    cancelSmtpTestBtn.addEventListener('click', closeSmtpTestModal);
+
+    generateApiKeyBtn.addEventListener('click', generateApiKey);
+    copyApiKeyBtn.addEventListener('click', copyApiKey);
+
+    createBackupBtn.addEventListener('click', createBackup);
+    importFileBtn.addEventListener('click', () => importFile.click());
+    importFile.addEventListener('change', handleFileSelection);
+    startImportBtn.addEventListener('click', startImport);
+
+    // Event-Listener für Logo-Upload
+    logoUploadBtn.addEventListener('click', () => logoUpload.click());
+    logoUpload.addEventListener('change', handleLogoUpload);
+    logoRemoveBtn.addEventListener('click', removeLogo);
+
+    // Event-Listener für Farbwähler
+    accentColor.addEventListener('input', updateColorHex);
+    accentColorHex.addEventListener('input', updateColorPicker);
+
+    // Event-Listener für SMTP-Test
+    smtpTestForm.addEventListener('submit', testSmtpConnection);
+
+    // Event-Listener für Modal-Schließen
+    document.querySelectorAll('.close').forEach(closeBtn => {
+      closeBtn.addEventListener('click', function() {
+        templateModal.style.display = 'none';
+        smtpTestModal.style.display = 'none';
+      });
+    });
+
+    // Funktion zum Laden der allgemeinen Einstellungen
+    async function loadGeneralSettings() {
+      try {
+        const settings = await apiRequest('/settings/general');
+
+        // Formular mit Einstellungen füllen
+        document.getElementById('companyName').value = settings.companyName || '';
+        document.getElementById('defaultLanguage').value = settings.defaultLanguage || 'de';
+        document.getElementById('dateFormat').value = settings.dateFormat || 'dd.MM.yyyy';
+        document.getElementById('reportsPath').value = settings.reportsPath || '';
+        document.getElementById('autoCheckUpdates').checked = settings.autoCheckUpdates || false;
+      } catch (error) {
+        showAlert(error.message || 'Fehler beim Laden der Einstellungen', 'error');
+      }
+    }
+
+    // Funktion zum Speichern der allgemeinen Einstellungen
+    async function saveGeneralSettings(e) {
+      e.preventDefault();
+
+      // Daten aus dem Formular sammeln
+      const formData = {
+        companyName: document.getElementById('companyName').value,
+        defaultLanguage: document.getElementById('defaultLanguage').value,
+        dateFormat: document.getElementById('dateFormat').value,
+        reportsPath: document.getElementById('reportsPath').value,
+        autoCheckUpdates: document.getElementById('autoCheckUpdates').checked
+      };
+
+      try {
+        // API-Anfrage zum Speichern der Einstellungen
+        await apiRequest('/settings/general', 'PUT', formData);
+
+        showAlert('Allgemeine Einstellungen gespeichert', 'success');
+      } catch (error) {
+        showAlert(error.message || 'Fehler beim Speichern der Einstellungen', 'error');
+      }
+    }
+
+    // Funktion zum Laden der E-Mail-Einstellungen
+    async function loadEmailSettings() {
+      try {
+        const settings = await apiRequest('/settings/email');
+
+        // Formular mit Einstellungen füllen
+        document.getElementById('senderName').value = settings.senderName || '';
+        document.getElementById('senderEmail').value = settings.senderEmail || '';
+        document.getElementById('smtpHost').value = settings.smtpHost || '';
+        document.getElementById('smtpPort').value = settings.smtpPort || '';
+        document.getElementById('smtpSecurity').value = settings.smtpSecurity || 'tls';
+        document.getElementById('smtpUsername').value = settings.smtpUsername || '';
+        document.getElementById('smtpPassword').value = settings.smtpPassword || '';
+      } catch (error) {
+        showAlert(error.message || 'Fehler beim Laden der E-Mail-Einstellungen', 'error');
+      }
+    }
+
+    // Funktion zum Speichern der E-Mail-Einstellungen
+    async function saveEmailSettings(e) {
+      e.preventDefault();
+
+      // Daten aus dem Formular sammeln
+      const formData = {
+        senderName: document.getElementById('senderName').value,
+        senderEmail: document.getElementById('senderEmail').value,
+        smtpHost: document.getElementById('smtpHost').value,
+        smtpPort: document.getElementById('smtpPort').value,
+        smtpSecurity: document.getElementById('smtpSecurity').value,
+        smtpUsername: document.getElementById('smtpUsername').value,
+        smtpPassword: document.getElementById('smtpPassword').value
+      };
+
+      try {
+        // API-Anfrage zum Speichern der E-Mail-Einstellungen
+        await apiRequest('/settings/email', 'PUT', formData);
+
+        showAlert('E-Mail-Einstellungen gespeichert', 'success');
+      } catch (error) {
+        showAlert(error.message || 'Fehler beim Speichern der E-Mail-Einstellungen', 'error');
+      }
+    }
+
+    // Funktion zum Laden der Vorlagen
+    async function loadTemplates() {
+      templatesLoader.style.display = 'block';
+      templatesList.innerHTML = '';
+
+      try {
+        const templates = await apiRequest('/email-templates');
+
+        if (templates.length === 0) {
+          templatesList.innerHTML = `
+            <div class="empty-state">
+              <p>Keine E-Mail-Vorlagen gefunden.</p>
+              <p>Erstellen Sie Ihre erste Vorlage, indem Sie auf "Neue Vorlage" klicken.</p>
+            </div>
+          `;
+        } else {
+          // Nach Kategorien gruppieren
+          const categorizedTemplates = groupTemplatesByCategory(templates);
+
+          // Vorlagen nach Kategorien anzeigen
+          displayCategorizedTemplates(categorizedTemplates);
+        }
+      } catch (error) {
+        showAlert(error.message || 'Fehler beim Laden der Vorlagen', 'error');
+        templatesList.innerHTML = `
+          <div class="error-state">
+            <p>Fehler beim Laden der Vorlagen.</p>
+          </div>
+        `;
+      } finally {
+        templatesLoader.style.display = 'none';
+      }
+    }
+
+    // Funktion zum Gruppieren von Vorlagen nach Kategorien
+    function groupTemplatesByCategory(templates) {
+      const categoryMap = {
+        'initial': 'Erstansprache',
+        'followup': 'Follow-up',
+        'proposal': 'Angebot',
+        'thankyou': 'Danksagung',
+        'other': 'Sonstiges'
+      };
+
+      const categorized = {};
+
+      templates.forEach(template => {
+        const category = template.category || 'other';
+        const categoryName = categoryMap[category] || 'Sonstiges';
+
+        if (!categorized[category]) {
+          categorized[category] = {
+            name: categoryName,
+            templates: []
+          };
+        }
+
+        categorized[category].templates.push(template);
+      });
+
+      return categorized;
+    }
+
+    // Funktion zum Anzeigen der kategorisierten Vorlagen
+    function displayCategorizedTemplates(categorizedTemplates) {
+      // Sortierte Kategorie-Schlüssel
+      const sortedCategories = ['initial', 'followup', 'proposal', 'thankyou', 'other'];
+
+      sortedCategories.forEach(categoryKey => {
+        const category = categorizedTemplates[categoryKey];
+
+        if (category && category.templates.length > 0) {
+          // Kategorie-Überschrift
+          const categoryHeader = document.createElement('div');
+          categoryHeader.className = 'template-category';
+          categoryHeader.innerHTML = `<h3>${category.name}</h3>`;
+          templatesList.appendChild(categoryHeader);
+
+          // Vorlagen in dieser Kategorie
+          category.templates.forEach(template => {
+            const templateItem = document.createElement('div');
+            templateItem.className = 'template-item';
+
+            templateItem.innerHTML = `
+              <div class="template-info">
+                <div class="template-name">${template.name}</div>
+                <div class="template-description">${template.description || ''}</div>
+                <div class="template-meta">
+                  <span class="template-language">${template.language === 'en' ? 'Englisch' : 'Deutsch'}</span>
+                  <span class="template-dot">•</span>
+                  <span class="template-tone">${getToneLabel(template.tone)}</span>
+                </div>
+              </div>
+              <div class="template-actions">
+                <button class="btn-icon edit-template" title="Bearbeiten">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                </button>
+                <button class="btn-icon clone-template" title="Duplizieren">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </button>
+                <button class="btn-icon delete-template" title="Löschen">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+              </div>
+            `;
+
+            // Event-Listener für Vorlage-Aktionen
+            templateItem.querySelector('.edit-template').addEventListener('click', () => openEditTemplateModal(template));
+            templateItem.querySelector('.clone-template').addEventListener('click', () => cloneTemplate(template));
+            templateItem.querySelector('.delete-template').addEventListener('click', () => {
+              if (confirm(`Möchtest du die Vorlage "${template.name}" wirklich löschen?`)) {
+                deleteTemplate(template.id);
+              }
+            });
+
+            templatesList.appendChild(templateItem);
+          });
+        }
+      });
+    }
+
+    // Funktion zum Öffnen des "Vorlage hinzufügen" Modals
+    function openAddTemplateModal() {
+      templateModalTitle.textContent = 'Neue E-Mail-Vorlage erstellen';
+      templateForm.reset();
+      templateId.value = '';
+
+      // Standardwerte setzen
+      document.getElementById('templateLanguage').value = 'de';
+      document.getElementById('templateTone').value = 'professional';
+
+      templateModal.style.display = 'block';
+    }
+
+    // Funktion zum Öffnen des "Vorlage bearbeiten" Modals
+    function openEditTemplateModal(template) {
+      templateModalTitle.textContent = 'E-Mail-Vorlage bearbeiten';
+      templateId.value = template.id;
+
+      // Formular mit Vorlagen-Daten füllen
+      document.getElementById('templateName').value = template.name || '';
+      document.getElementById('templateCategory').value = template.category || 'other';
+      document.getElementById('templateDescription').value = template.description || '';
+      document.getElementById('templateLanguage').value = template.language || 'de';
+      document.getElementById('templateTone').value = template.tone || 'professional';
+      document.getElementById('templateSubject').value = template.subject || '';
+      document.getElementById('templateBody').value = template.body || '';
+
+      templateModal.style.display = 'block';
+    }
+
+    // Funktion zum Schließen des Vorlagen-Modals
+    function closeTemplateModal() {
+      templateModal.style.display = 'none';
+    }
+
+    // Funktion zum Speichern einer Vorlage
+    async function saveTemplate(e) {
+      e.preventDefault();
+
+      // Daten aus dem Formular sammeln
+      const formData = {
+        id: templateId.value || undefined,
+        name: document.getElementById('templateName').value,
+        category: document.getElementById('templateCategory').value,
+        description: document.getElementById('templateDescription').value,
+        language: document.getElementById('templateLanguage').value,
+        tone: document.getElementById('templateTone').value,
+        subject: document.getElementById('templateSubject').value,
+        body: document.getElementById('templateBody').value
+      };
+
+      try {
+        if (formData.id) {
+          // Vorlage aktualisieren
+          await apiRequest(`/email-templates/${formData.id}`, 'PUT', formData);
+          showAlert('Vorlage erfolgreich aktualisiert', 'success');
+        } else {
+          // Neue Vorlage erstellen
+          await apiRequest('/email-templates', 'POST', formData);
+          showAlert('Vorlage erfolgreich erstellt', 'success');
+        }
+
+        // Modal schließen und Vorlagen neu laden
+        closeTemplateModal();
+        loadTemplates();
+      } catch (error) {
+        showAlert(error.message || 'Fehler beim Speichern der Vorlage', 'error');
+      }
+    }
+
+    // Funktion zum Klonen einer Vorlage
+    async function cloneTemplate(template) {
+      // Vorlage kopieren und ID entfernen
+      const clonedTemplate = { ...template };
+      delete clonedTemplate.id;
+
+      // Name anpassen
+      clonedTemplate.name = `${template.name} (Kopie)`;
+
+      try {
+        // API-Anfrage zum Erstellen der kopierten Vorlage
+        await apiRequest('/email-templates', 'POST', clonedTemplate);
+
+        showAlert('Vorlage erfolgreich dupliziert', 'success');
+        loadTemplates();
+      } catch (error) {
+        showAlert(error.message || 'Fehler beim Duplizieren der Vorlage', 'error');
+      }
+    }
+
+    // Funktion zum Löschen einer Vorlage
+    async function deleteTemplate(id) {
+      try {
+        await apiRequest(`/email-templates/${id}`, 'DELETE');
+        showAlert('Vorlage erfolgreich gelöscht', 'success');
+        loadTemplates();
+      } catch (error) {
+        showAlert(error.message || 'Fehler beim Löschen der Vorlage', 'error');
+      }
+    }
+
+    // Funktion zum Öffnen des SMTP-Test-Modals
+    function openSmtpTestModal() {
+      smtpTestForm.reset();
+      smtpTestResult.style.display = 'none';
+      smtpTestModal.style.display = 'block';
+    }
+
+    // Funktion zum Schließen des SMTP-Test-Modals
+    function closeSmtpTestModal() {
+      smtpTestModal.style.display = 'none';
+    }
+
+    // Funktion zum Testen der SMTP-Verbindung
+    async function testSmtpConnection(e) {
+      e.preventDefault();
+
+      // E-Mail-Adresse aus dem Formular holen
+      const recipient = document.getElementById('testEmailRecipient').value;
+
+      // Aktuelle SMTP-Einstellungen aus dem Formular holen
+      const smtpSettings = {
+        host: document.getElementById('smtpHost').value,
+        port: document.getElementById('smtpPort').value,
+        security: document.getElementById('smtpSecurity').value,
+        username: document.getElementById('smtpUsername').value,
+        password: document.getElementById('smtpPassword').value,
+        senderName: document.getElementById('senderName').value,
+        senderEmail: document.getElementById('senderEmail').value,
+        recipient: recipient
+      };
+
+      // Test-Ergebnis zurücksetzen und laden anzeigen
+      smtpTestResult.innerHTML = `
+        <div class="test-loading">
+          <div class="loader" style="width: 30px; height: 30px;"></div>
+          <p>Verbindung wird getestet...</p>
+        </div>
+      `;
+      smtpTestResult.style.display = 'block';
+
+      try {
+        // API-Anfrage zum Testen der SMTP-Verbindung
+        const result = await apiRequest('/settings/test-smtp', 'POST', smtpSettings);
+
+        // Erfolg anzeigen
+        smtpTestResult.innerHTML = `
+          <div class="test-success">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            <p>Verbindung erfolgreich hergestellt!</p>
+            <p>Eine Test-E-Mail wurde an ${recipient} gesendet.</p>
+          </div>
+        `;
+      } catch (error) {
+        // Fehler anzeigen
+        smtpTestResult.innerHTML = `
+          <div class="test-error">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <p>Fehler bei der Verbindung:</p>
+            <pre>${error.message || 'Unbekannter Fehler'}</pre>
+          </div>
+        `;
+      }
+    }
+
+    // Funktion zum Laden der Branding-Einstellungen
+    async function loadBrandingSettings() {
+      try {
+        const settings = await apiRequest('/settings/branding');
+
+        // Logo-Vorschau aktualisieren
+        if (settings.logoUrl) {
+          logoPreview.src = settings.logoUrl;
+        }
+
+        // Farbwähler aktualisieren
+        accentColor.value = settings.accentColor || '#e81818';
+        accentColorHex.value = settings.accentColor || '#e81818';
+
+        // Berichtsfußzeile
+        document.getElementById('reportFooter').value = settings.reportFooter || '';
+      } catch (error) {
+        showAlert(error.message || 'Fehler beim Laden der Branding-Einstellungen', 'error');
+      }
+    }
+
+    // Funktion zum Speichern der Branding-Einstellungen
+    async function saveBrandingSettings(e) {
+      e.preventDefault();
+
+      // Daten aus dem Formular sammeln
+      const formData = {
+        accentColor: accentColor.value,
+        reportFooter: document.getElementById('reportFooter').value
+      };
+
+      try {
+        // API-Anfrage zum Speichern der Branding-Einstellungen
+        await apiRequest('/settings/branding', 'PUT', formData);
+
+        showAlert('Branding-Einstellungen gespeichert', 'success');
+
+        // CSS-Variablen aktualisieren
+        document.documentElement.style.setProperty('--accent-color', formData.accentColor);
+      } catch (error) {
+        showAlert(error.message || 'Fehler beim Speichern der Branding-Einstellungen', 'error');
+      }
+    }
+
+    // Funktion zum Verarbeiten des Logo-Uploads
+    function handleLogoUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // Prüfen, ob die Datei ein Bild ist
+      if (!file.type.startsWith('image/')) {
+        showAlert('Bitte wählen Sie eine Bilddatei aus.', 'error');
+        return;
+      }
+
+      // Maximale Dateigröße: 1 MB
+      if (file.size > 1024 * 1024) {
+        showAlert('Die Datei ist zu groß. Maximale Größe: 1 MB.', 'error');
+        return;
+      }
+
+      // Logo-Vorschau aktualisieren
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        logoPreview.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+
+      // Datei automatisch hochladen
+      uploadLogo(file);
+    }
+
+    // Funktion zum Hochladen des Logos
+    async function uploadLogo(file) {
+      try {
+        // FormData erstellen
+        const formData = new FormData();
+        formData.append('logo', file);
+
+        // API-Anfrage zum Hochladen des Logos
+        const response = await fetch('/api/settings/upload-logo', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Fehler beim Hochladen des Logos');
+        }
+
+        const result = await response.json();
+
+        // Erfolgsmeldung anzeigen
+        showAlert('Logo erfolgreich hochgeladen', 'success');
+      } catch (error) {
+        showAlert(error.message || 'Fehler beim Hochladen des Logos', 'error');
+      }
+    }
+
+    // Funktion zum Entfernen des Logos
+    async function removeLogo() {
+      try {
+        // API-Anfrage zum Entfernen des Logos
+        await apiRequest('/settings/remove-logo', 'POST');
+
+        // Logo-Vorschau zurücksetzen
+        logoPreview.src = 'images/logo.png';
+
+        showAlert('Logo erfolgreich entfernt', 'success');
+      } catch (error) {
+        showAlert(error.message || 'Fehler beim Entfernen des Logos', 'error');
+      }
+    }
+
+    // Funktion zum Aktualisieren des Hex-Wertes
+    function updateColorHex() {
+      accentColorHex.value = accentColor.value;
+    }
+
+    // Funktion zum Aktualisieren des Farbwählers
+    function updateColorPicker() {
+      // Hex-Wert validieren
+      const hexRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+      if (hexRegex.test(accentColorHex.value)) {
+        accentColor.value = accentColorHex.value;
+      }
+    }
+
+    // Funktion zum Laden der API-Einstellungen
+    async function loadApiSettings() {
+      try {
+        const settings = await apiRequest('/settings/api');
+
+        // Formular mit Einstellungen füllen
+        document.getElementById('enableApi').checked = settings.enableApi || false;
+        apiKey.value = settings.apiKey || '';
+        document.getElementById('openaiApiKey').value = settings.openaiApiKey || '';
+        document.getElementById('openaiModel').value = settings.openaiModel || 'gpt-4';
+      } catch (error) {
+        showAlert(error.message || 'Fehler beim Laden der API-Einstellungen', 'error');
+      }
+    }
+
+    // Funktion zum Speichern der API-Einstellungen
+    async function saveApiSettings(e) {
+      e.preventDefault();
+
+      // Daten aus dem Formular sammeln
+      const formData = {
+        enableApi: document.getElementById('enableApi').checked,
+        apiKey: apiKey.value,
+        openaiApiKey: document.getElementById('openaiApiKey').value,
+        openaiModel: document.getElementById('openaiModel').value
+      };
+
+      try {
+        // API-Anfrage zum Speichern der API-Einstellungen
+        await apiRequest('/settings/api', 'PUT', formData);
+
+        showAlert('API-Einstellungen gespeichert', 'success');
+      } catch (error) {
+        showAlert(error.message || 'Fehler beim Speichern der API-Einstellungen', 'error');
+      }
+    }
+
+    // Funktion zum Generieren eines API-Schlüssels
+    async function generateApiKey() {
+      try {
+        // API-Anfrage zum Generieren eines API-Schlüssels
+        const response = await apiRequest('/settings/generate-api-key', 'POST');
+
+        // API-Schlüssel setzen
+        apiKey.value = response.apiKey;
+
+        showAlert('API-Schlüssel erfolgreich generiert', 'success');
+      } catch (error) {
+        showAlert(error.message || 'Fehler beim Generieren des API-Schlüssels', 'error');
+      }
+    }
+
+    // Funktion zum Kopieren des API-Schlüssels
+    function copyApiKey() {
+      navigator.clipboard.writeText(apiKey.value)
+        .then(() => {
+          showAlert('API-Schlüssel in die Zwischenablage kopiert', 'success');
+        })
+        .catch(err => {
+          showAlert('Fehler beim Kopieren des API-Schlüssels', 'error');
+        });
+    }
+
+    // Funktion zum Laden der Backup-Historie
+    async function loadBackupHistory() {
+      try {
+        const backups = await apiRequest('/settings/backup-history');
+
+        if (backups.length === 0) {
+          backupHistoryTable.innerHTML = `
+            <tr>
+              <td colspan="4" style="text-align: center;">Keine Backups vorhanden</td>
+            </tr>
+          `;
+        } else {
+          backupHistoryTable.innerHTML = '';
+
+          backups.forEach(backup => {
+            const row = document.createElement('tr');
+
+            row.innerHTML = `
+              <td>${formatDate(backup.date)}</td>
+              <td>${formatFileSize(backup.size)}</td>
+              <td>${backup.type}</td>
+              <td>
+                <button class="btn-icon download-backup" title="Herunterladen" data-path="${backup.path}">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                </button>
+                <button class="btn-icon restore-backup" title="Wiederherstellen" data-id="${backup.id}">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>
+                </button>
+                <button class="btn-icon delete-backup" title="Löschen" data-id="${backup.id}">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+              </td>
+            `;
+
+            // Event-Listener für Backup-Aktionen
+            row.querySelector('.download-backup').addEventListener('click', function() {
+              window.location.href = `/api/settings/download-backup?path=${encodeURIComponent(this.getAttribute('data-path'))}`;
+            });
+
+            row.querySelector('.restore-backup').addEventListener('click', function() {
+              if (confirm('Sind Sie sicher, dass Sie dieses Backup wiederherstellen möchten? Aktuelle Daten könnten überschrieben werden.')) {
+                restoreBackup(this.getAttribute('data-id'));
+              }
+            });
+
+            row.querySelector('.delete-backup').addEventListener('click', function() {
+              if (confirm('Sind Sie sicher, dass Sie dieses Backup löschen möchten?')) {
+                deleteBackup(this.getAttribute('data-id'));
+              }
+            });
+
+            backupHistoryTable.appendChild(row);
+          });
+        }
+      } catch (error) {
+        showAlert(error.message || 'Fehler beim Laden der Backup-Historie', 'error');
+      }
+    }
+
+    // Funktion zum Erstellen eines Backups
+    async function createBackup() {
+      try {
+        const response = await apiRequest('/settings/create-backup', 'POST');
+
+        showAlert('Backup erfolgreich erstellt', 'success');
+        loadBackupHistory();
+
+        // Optional: Automatischer Download
+        window.location.href = `/api/settings/download-backup?path=${encodeURIComponent(response.path)}`;
+      } catch (error) {
+        showAlert(error.message || 'Fehler beim Erstellen des Backups', 'error');
+      }
+    }
+
+    // Funktion zum Wiederherstellen eines Backups
+    async function restoreBackup(id) {
+      try {
+        await apiRequest(`/settings/restore-backup/${id}`, 'POST');
+
+        showAlert('Backup erfolgreich wiederhergestellt', 'success');
+
+        // Seite neu laden, um die wiederhergestellten Daten anzuzeigen
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } catch (error) {
+        showAlert(error.message || 'Fehler beim Wiederherstellen des Backups', 'error');
+      }
+    }
+
+    // Funktion zum Löschen eines Backups
+    async function deleteBackup(id) {
+      try {
+        await apiRequest(`/settings/delete-backup/${id}`, 'DELETE');
+
+        showAlert('Backup erfolgreich gelöscht', 'success');
+        loadBackupHistory();
+      } catch (error) {
+        showAlert(error.message || 'Fehler beim Löschen des Backups', 'error');
+      }
+    }
+
+    // Funktion zum Verarbeiten der Dateiauswahl für den Import
+    function handleFileSelection(e) {
+      const file = e.target.files[0];
+      if (!file) {
+        selectedFileInfo.textContent = 'Keine Datei ausgewählt';
+        startImportBtn.disabled = true;
+        return;
+      }
+
+      // Dateiinfo anzeigen
+      selectedFileInfo.textContent = `${file.name} (${formatFileSize(file.size)})`;
+      startImportBtn.disabled = false;
+    }
+
+    // Funktion zum Starten des Imports
+    async function startImport() {
+      const file = importFile.files[0];
+      if (!file) {
+        showAlert('Bitte wählen Sie eine Datei aus', 'warning');
+        return;
+      }
+
+      try {
+        // FormData erstellen
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('overwriteExisting', document.getElementById('overwriteExisting').checked);
+
+        // API-Anfrage zum Importieren der Datei
+        const response = await fetch('/api/settings/import', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Fehler beim Import');
+        }
+
+        showAlert('Daten erfolgreich importiert', 'success');
+
+        // Seite neu laden, um die importierten Daten anzuzeigen
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } catch (error) {
+        showAlert(error.message || 'Fehler beim Importieren der Daten', 'error');
+      }
+    }
+
+    // Hilfsfunktion: Tonfall-Label ermitteln
+    function getToneLabel(tone) {
+      switch (tone) {
+        case 'formal': return 'Formell';
+        case 'friendly': return 'Freundlich';
+        case 'casual': return 'Locker';
+        case 'professional': return 'Professionell';
+        default: return tone || 'Professionell';
+      }
+    }
+
+    // Hilfsfunktion: Dateigröße formatieren
+    function formatFileSize(bytes) {
+      if (bytes === 0 || bytes === undefined || bytes === null) return '0 Bytes';
+
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Schließe Modals beim Klicken außerhalb
+    window.addEventListener('click', function(event) {
+      if (event.target === templateModal) {
+        templateModal.style.display = 'none';
+      } else if (event.target === smtpTestModal) {
+        smtpTestModal.style.display = 'none';
+      }
+    });
+  });
+</script>
+
+<style>
+  /* Zusätzliche Styles für die Einstellungen-Seite */
+  .settings-nav {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+  }
+
+  .settings-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background-color: var(--card-color);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: border-color 0.3s, background-color 0.3s;
+  }
+
+  .settings-nav-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .settings-nav-item.active {
+    border-color: var(--accent-color);
+    background-color: rgba(232, 24, 24, 0.1);
+  }
+
+  .settings-nav-item svg {
+    opacity: 0.7;
+  }
+
+  .settings-tab {
+    display: none;
+  }
+
+  .settings-tab.active {
+    display: block;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 20px;
+  }
+
+  .form-row .form-group {
+    flex: 1;
+  }
+
+  h3 {
+    margin-top: 30px;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .checkbox-container input[type="checkbox"] {
+    width: auto;
+  }
+
+  .file-upload {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .preview-container {
+    width: 200px;
+    height: 60px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .logo-preview {
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  .upload-controls {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .upload-controls button {
+    width: fit-content;
+  }
+
+  .color-picker-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .color-hex-input {
+    width: 100px;
+  }
+
+  input[type="color"] {
+    width: 50px;
+    height: 40px;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .api-key-container {
+    display: flex;
+    gap: 10px;
+  }
+
+  .api-key-container input {
+    flex: 1;
+  }
+
+  .settings-section {
+    margin-bottom: 40px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .settings-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .settings-section p {
+    color: var(--text-color-secondary);
+    margin-bottom: 20px;
+  }
+
+  .import-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+
+  .selected-file-info {
+    color: var(--text-color-secondary);
+    font-size: 0.9rem;
+  }
+
+  .templates-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .template-category {
+    margin-bottom: 5px;
+  }
+
+  .template-category h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text-color-secondary);
+  }
+
+  .template-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    transition: border-color 0.3s;
+  }
+
+  .template-item:hover {
+    border-color: var(--accent-color);
+  }
+
+  .template-info {
+    flex: 1;
+  }
+
+  .template-name {
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+
+  .template-description {
+    color: var(--text-color-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+  }
+
+  .template-meta {
+    display: flex;
+    font-size: 0.8rem;
+    color: var(--text-color-secondary);
+  }
+
+  .template-dot {
+    margin: 0 5px;
+  }
+
+  .template-actions {
+    display: flex;
+    gap: 5px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 30px;
+    color: var(--text-color-secondary);
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    overflow: auto;
+  }
+
+  .modal-content {
+    background-color: var(--card-color);
+    margin: 10vh auto;
+    border-radius: 8px;
+    max-width: 500px;
+    width: 90%;
+    animation: modalFadeIn 0.3s;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  }
+
+  .modal-lg {
+    max-width: 800px;
+  }
+
+  @keyframes modalFadeIn {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .modal-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+
+  .close {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--text-color-secondary);
+    cursor: pointer;
+  }
+
+  .close:hover {
+    color: var(--accent-color);
+  }
+
+  .modal-body {
+    padding: 20px;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .test-result {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 6px;
+  }
+
+  .test-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-color-secondary);
+  }
+
+  .test-success {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: var(--success-color);
+  }
+
+  .test-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: var(--error-color);
+  }
+
+  .test-result pre {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 10px;
+    border-radius: 4px;
+    font-family: monospace;
+    margin-top: 10px;
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  @media (max-width: 768px) {
+    .form-row {
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .file-upload {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .preview-container {
+      width: 100%;
+    }
+
+    .api-key-container {
+      flex-direction: column;
+    }
+
+    .import-controls {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>

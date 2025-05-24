@@ -19,7 +19,7 @@ import static spark.Spark.*;
  */
 public class WebsiteAnalyzer {
     private static final Logger logger = Logger.getLogger(WebsiteAnalyzer.class.getName());
-    private static final int DEFAULT_PORT = 8080;
+    private static final int PORT = 8080;
 
     public static void main(String[] args) {
         try {
@@ -54,18 +54,26 @@ public class WebsiteAnalyzer {
             ControllerRegistry controllerRegistry = new ControllerRegistry(appConfig, schedulerService);
             controllerRegistry.registerAllRoutes();
 
-            // Hole den verwendeten Port für die Logging-Meldung
-            int port = port();
-            logger.info("Website Analyzer gestartet: http://localhost:" + port);
-            logger.info("  - Status-Endpunkt: http://localhost:" + port + "/status");
-            logger.info("  - Hauptseite: http://localhost:" + port + "/");
+            logger.info("Website Analyzer gestartet: http://localhost:" + PORT);
+            logger.info("Verfügbare Services: Website-Analyse, Lead-Management, E-Mail-Templates, Kampagnen");
 
             // Füge einen Shutdown-Hook hinzu, um Ressourcen freizugeben
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 logger.info("Anwendung wird heruntergefahren...");
+
+                // Scheduler beenden
                 schedulerService.shutdown();
+
+                // E-Mail-Kampagnen-Service beenden
+                appConfig.shutdown();
+
+                // Datenbankverbindung schließen
                 DatabaseConfig.closeConnection();
+
+                // Spark Server beenden
                 Spark.stop();
+
+                logger.info("Anwendung erfolgreich heruntergefahren");
             }));
         } catch (Exception e) {
             logger.severe("Fehler beim Starten der Anwendung: " + e.getMessage());
@@ -77,11 +85,8 @@ public class WebsiteAnalyzer {
      * Initialisiert den Spark-Webserver
      */
     private static void initializeServer() {
-        // Setze den Port - lese den Port aus der Umgebungsvariablen oder verwende den Standardport
-        int port = Integer.parseInt(AppConfig.getEnv("PORT", String.valueOf(DEFAULT_PORT)));
-        port(port);
-
-        logger.info("Server wird auf Port " + port + " gestartet");
+        // Setze den Port
+        port(PORT);
 
         // Statische Dateien aus dem resources/public-Verzeichnis bereitstellen
         staticFiles.location("/public");
@@ -91,21 +96,6 @@ public class WebsiteAnalyzer {
 
         // Exception Handler für API-Fehler
         setupExceptionHandling();
-
-        // Redirect von / zur index.html, falls die Standardseite nicht automatisch geladen wird
-        get("/", (req, res) -> {
-            res.redirect("/index.html");
-            return null;
-        });
-
-        // Einfacher Endpoint zum Testen, ob der Server läuft
-        get("/status", (req, res) -> {
-            res.type("application/json");
-            return JsonUtil.toJson(JsonUtil.success("Website Analyzer läuft!",
-                    "version", "1.0",
-                    "timestamp", System.currentTimeMillis(),
-                    "status", "online"));
-        });
     }
 
     /**

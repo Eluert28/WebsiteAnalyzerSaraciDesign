@@ -5,6 +5,7 @@ import com.saraci.websiteanalyzer.repository.impl.*;
 import com.saraci.websiteanalyzer.service.WebsiteAnalyzerService;
 import com.saraci.websiteanalyzer.service.WebsiteAnalyzerServiceImpl;
 import com.saraci.websiteanalyzer.service.analyzer.*;
+import com.saraci.websiteanalyzer.service.email.EmailCampaignService;
 import com.saraci.websiteanalyzer.service.report.EmailSender;
 import com.saraci.websiteanalyzer.service.report.EmailSenderImpl;
 import com.saraci.websiteanalyzer.service.report.PdfReportGenerator;
@@ -29,6 +30,8 @@ public class AppConfig {
     private final WebsiteRepository websiteRepository;
     private final AnalysisResultRepository analysisResultRepository;
     private final ScheduleRepository scheduleRepository;
+    private final LeadRepository leadRepository;
+    private final EmailTemplateRepository emailTemplateRepository;
 
     // Services
     private final SeoAnalyzer seoAnalyzer;
@@ -38,6 +41,7 @@ public class AppConfig {
     private final PdfReportGenerator reportGenerator;
     private final EmailSender emailSender;
     private final WebsiteAnalyzerService websiteAnalyzerService;
+    private final EmailCampaignService emailCampaignService;
 
     // Umgebungsvariablen initialisieren
     static {
@@ -83,6 +87,8 @@ public class AppConfig {
             this.websiteRepository = new WebsiteRepositoryImpl();
             this.analysisResultRepository = new AnalysisResultRepositoryImpl();
             this.scheduleRepository = new ScheduleRepositoryImpl();
+            this.leadRepository = new LeadRepositoryImpl();
+            this.emailTemplateRepository = new EmailTemplateRepositoryImpl();
 
             // E-Mail-Konfiguration aus Umgebungsvariablen laden
             String emailHost = getEnv("EMAIL_HOST", "smtp.gmail.com");
@@ -111,6 +117,13 @@ public class AppConfig {
             this.reportGenerator = new PdfReportGeneratorImpl();
             this.emailSender = new EmailSenderImpl(emailConfig);
 
+            // E-Mail-Kampagnen-Service initialisieren
+            this.emailCampaignService = new EmailCampaignService(
+                    emailSender,
+                    emailTemplateRepository,
+                    leadRepository
+            );
+
             // Hauptservice erstellen
             this.websiteAnalyzerService = new WebsiteAnalyzerServiceImpl(
                     seoAnalyzer,
@@ -121,7 +134,7 @@ public class AppConfig {
                     emailSender
             );
 
-            logger.info("AppConfig wurde erfolgreich initialisiert");
+            logger.info("AppConfig wurde erfolgreich initialisiert mit E-Mail-Kampagnen-Service");
         } catch (SQLException e) {
             logger.severe("Fehler bei der Initialisierung der Datenbank: " + e.getMessage());
             throw new RuntimeException("Fehler bei der Initialisierung der Datenbank", e);
@@ -148,9 +161,21 @@ public class AppConfig {
         return scheduleRepository;
     }
 
+    public LeadRepository getLeadRepository() {
+        return leadRepository;
+    }
+
+    public EmailTemplateRepository getEmailTemplateRepository() {
+        return emailTemplateRepository;
+    }
+
     // Getters für Services
     public WebsiteAnalyzerService getWebsiteAnalyzerService() {
         return websiteAnalyzerService;
+    }
+
+    public EmailCampaignService getEmailCampaignService() {
+        return emailCampaignService;
     }
 
     public SeoAnalyzer getSeoAnalyzer() {
@@ -175,6 +200,16 @@ public class AppConfig {
 
     public EmailSender getEmailSender() {
         return emailSender;
+    }
+
+    /**
+     * Beendet alle Services ordnungsgemäß.
+     */
+    public void shutdown() {
+        if (emailCampaignService != null) {
+            emailCampaignService.shutdown();
+        }
+        logger.info("AppConfig Services heruntergefahren");
     }
 
     /**

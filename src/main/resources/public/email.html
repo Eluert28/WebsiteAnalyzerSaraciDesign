@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-Mail-Management - Website Analyzer</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+</head>
+<body>
+<header>
+  <div class="container header-content">
+    <div class="logo">
+      <img src="images/logo.png" alt="Saraci Design Logo">
+      <div class="logo-text">
+        <h1>Website Analyzer</h1>
+        <p>E-Mail-Management</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="container">
+    <div class="nav-container">
+      <a href="/" class="nav-link">Analyse-Tool</a>
+      <a href="/dashboard.html" class="nav-link">Dashboard</a>
+      <a href="/schedules.html" class="nav-link">Zeitpläne</a>
+      <a href="/leads.html" class="nav-link">Leads</a>
+      <a href="/email.html" class="nav-link active">E-Mail</a>
+      <a href="/report.html" class="nav-link">Reports</a>
+      <a href="/settings.html" class="nav-link">Settings</a>
+    </div>
+  </div>
+</nav>
+
+<div class="main-content">
+  <div class="container">
+    <div id="alertContainer"></div>
+
+    <!-- Navigation Tabs -->
+    <div class="card" style="margin-bottom: 20px;">
+      <div class="card-body" style="padding: 15px;">
+        <div style="display: flex; gap: 20px; justify-content: center;">
+          <button class="btn" id="templatesTab" onclick="showTab('templates')">E-Mail-Templates</button>
+          <button class="btn btn-secondary" id="campaignsTab" onclick="showTab('campaigns')">Kampagnen</button>
+          <button class="btn btn-secondary" id="testTab" onclick="showTab('test')">Test-E-Mail</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- E-Mail-Templates Section -->
+    <div id="templatesSection">
+      <!-- Template erstellen -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Neues E-Mail-Template erstellen</h2>
+        </div>
+        <div class="card-body">
+          <form id="templateForm">
+            <div class="form-group">
+              <label for="templateName">Template-Name</label>
+              <input type="text" id="templateName" name="name" placeholder="z.B. Website Analysis Welcome" required>
+            </div>
+
+            <div class="form-group">
+              <label for="templateCategory">Kategorie</label>
+              <select id="templateCategory" name="category" required>
+                <option value="">-- Kategorie auswählen --</option>
+                <option value="welcome">Willkommen</option>
+                <option value="follow_up">Nachfassen</option>
+                <option value="analysis_report">Analyse-Bericht</option>
+                <option value="newsletter">Newsletter</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="templateSubject">E-Mail-Betreff</label>
+              <input type="text" id="templateSubject" name="subject" placeholder="Ihre Website-Analyse ist bereit, {name}!" required>
+              <span class="input-hint">Verfügbare Variablen: {name}, {email}, {company}, {website}</span>
+            </div>
+
+            <div class="form-group">
+              <label for="templateBody">E-Mail-Text</label>
+              <textarea id="templateBody" name="body" rows="8" placeholder="Hallo {name},&#10;&#10;vielen Dank für Ihr Interesse an unserer Website-Analyse für {website}.&#10;&#10;Ihr Team von {company}" required></textarea>
+              <span class="input-hint">Verfügbare Variablen: {name}, {email}, {company}, {website}</span>
+            </div>
+
+            <button type="submit" class="btn btn-block">Template erstellen</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Template-Liste -->
+      <div class="card" id="templatesCard" style="display: none; margin-top: 30px;">
+        <div class="card-header">
+          <h2>Vorhandene E-Mail-Templates</h2>
+        </div>
+        <div class="card-body">
+          <div class="loader-container" id="templatesLoader">
+            <div class="loader"></div>
+            <p>Templates werden geladen...</p>
+          </div>
+          <div class="table-container" id="templatesTable" style="display: none;">
+            <table>
+              <thead>
+              <tr>
+                <th>Name</th>
+                <th>Kategorie</th>
+                <th>Betreff</th>
+                <th>Verwendet</th>
+                <th>Erstellt</th>
+                <th>Aktionen</th>
+              </tr>
+              </thead>
+              <tbody id="templatesTableBody">
+              <!-- Templates werden hier eingefügt -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kampagnen Section -->
+    <div id="campaignsSection" style="display: none;">
+      <!-- Kampagne senden -->
+      <div class="card">
+        <div class="card-header">
+          <h2>E-Mail-Kampagne senden</h2>
+        </div>
+        <div class="card-body">
+          <form id="campaignForm">
+            <div class="form-group">
+              <label for="campaignTemplate">E-Mail-Template</label>
+              <select id="campaignTemplate" name="templateId" required>
+                <option value="">-- Template auswählen --</option>
+                <!-- Templates werden hier eingefügt -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="campaignType">Empfänger</label>
+              <select id="campaignType" name="type" required onchange="toggleLeadSelection()">
+                <option value="">-- Empfänger auswählen --</option>
+                <option value="all">Alle aktiven Leads</option>
+                <option value="specific">Spezifische Leads</option>
+              </select>
+            </div>
+
+            <div class="form-group" id="leadSelectionGroup" style="display: none;">
+              <label for="specificLeads">Lead-IDs (kommagetrennt)</label>
+              <input type="text" id="specificLeads" name="leadIds" placeholder="1,2,3,4">
+              <span class="input-hint">Geben Sie die IDs der Leads ein, getrennt durch Kommas</span>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+              <button type="submit" class="btn">Kampagne senden</button>
+              <button type="button" class="btn btn-secondary" onclick="previewCampaign()">Vorschau</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Kampagnen-Statistiken -->
+      <div class="card" id="campaignStatsCard" style="display: none; margin-top: 30px;">
+        <div class="card-header">
+          <h2>Kampagnen-Ergebnis</h2>
+        </div>
+        <div class="card-body">
+          <div id="campaignStats"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Test-E-Mail Section -->
+    <div id="testSection" style="display: none;">
+      <div class="card">
+        <div class="card-header">
+          <h2>Test-E-Mail senden</h2>
+        </div>
+        <div class="card-body">
+          <form id="testEmailForm">
+            <div class="form-group">
+              <label for="testTemplate">E-Mail-Template</label>
+              <select id="testTemplate" name="templateId" required>
+                <option value="">-- Template auswählen --</option>
+                <!-- Templates werden hier eingefügt -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="testEmail">Test-E-Mail-Adresse</label>
+              <input type="email" id="testEmail" name="testEmail" placeholder="test@beispiel.de" required>
+            </div>
+
+            <div class="form-group">
+              <label for="testName">Test-Name (optional)</label>
+              <input type="text" id="testName" name="testName" placeholder="Max Mustermann">
+            </div>
+
+            <div class="form-group">
+              <label for="testCompany">Test-Firma (optional)</label>
+              <input type="text" id="testCompany" name="testCompany" placeholder="Beispiel GmbH">
+            </div>
+
+            <div class="form-group">
+              <label for="testWebsite">Test-Website (optional)</label>
+              <input type="url" id="testWebsite" name="testWebsite" placeholder="https://beispiel.de">
+            </div>
+
+            <button type="submit" class="btn btn-block">Test-E-Mail senden</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Template-Vorschau -->
+      <div class="card" id="previewCard" style="display: none; margin-top: 30px;">
+        <div class="card-header">
+          <h2>Template-Vorschau</h2>
+        </div>
+        <div class="card-body">
+          <div id="previewContent"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loader für Aktionen -->
+    <div class="loader-container" id="actionLoader" style="display: none;">
+      <div class="loader"></div>
+      <p id="loaderText">Wird verarbeitet...</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="container footer-content">
+    <div class="footer-text">
+      &copy; 2025 Saraci Design. Alle Rechte vorbehalten.
+    </div>
+    <div class="footer-links">
+      <a href="/">Analyse-Tool</a>
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/schedules.html">Zeitpläne</a>
+      <a href="/leads.html">Leads</a>
+      <a href="/email.html">E-Mail</a>
+      <a href="/report.html">Reports</a>
+      <a href="/settings.html">Settings</a>
+      <a href="https://saraci-design.de" target="_blank">Saraci Design</a>
+    </div>
+  </div>
+</footer>
+
+<script src="js/utils.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      // DOM-Elemente
+      const templateForm = document.getElementById('templateForm');
+      const campaignForm = document.getElementById('campaignForm');
+      const testEmailForm = document.getElementById('testEmailForm');
+      const actionLoader = document.getElementById('actionLoader');
+      const loaderText = document.getElementById('loaderText');
+
+      // Initialisierung
+      loadTemplates();
+      loadTemplateOptions();
+
+      // URL-Parameter auswerten (für Integration von anderen Seiten)
+      const urlParams = new URLSearchParams(window.location.search);
+      const leadId = urlParams.get('leadId');
+      const leadIds = urlParams.get('leadIds');
+
+      if (leadId || leadIds) {
+          // Zur Kampagnen-Sektion wechseln
+          showTab('campaigns');
+
+          // Lead-IDs vorausfüllen
+          if (leadIds) {
+              document.getElementById('campaignType').value = 'specific';
+              document.getElementById('specificLeads').value = leadIds;
+              toggleLeadSelection();
+          }
+      }
+
+      // Event-Listener für Template-Formular
+      templateForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          await createTemplate();
+      });
+
+      // Event-Listener für Kampagnen-Formular
+      campaignForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          await sendCampaign();
+      });
+
+      // Event-Listener für Test-E-Mail-Formular
+      testEmailForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          await sendTestEmail();
+      });
+
+      // Tab-Funktionen
+      window.showTab = function(tabName) {
+          // Tab-Buttons aktualisieren
+          document.querySelectorAll('[id$="Tab"]').forEach(btn => {
+              btn.className = 'btn btn-secondary';
+          });
+          document.getElementById(tabName + 'Tab').className = 'btn';
+
+          // Sections anzeigen/verstecken
+          document.getElementById('templatesSection').style.display = tabName === 'templates' ? 'block' : 'none';
+          document.getElementById('campaignsSection').style.display = tabName === 'campaigns' ? 'block' : 'none';
+          document.getElementById('testSection').style.display = tabName === 'test' ? 'block' : 'none';
+
+          // Bei Templates-Tab die Liste laden
+          if (tabName === 'templates') {
+              loadTemplates();
+          }
+      };
+
+      // Lead-Auswahl ein-/ausblenden
+      window.toggleLeadSelection = function() {
+          const campaignType = document.getElementById('campaignType').value;
+          const leadSelectionGroup = document.getElementById('leadSelectionGroup');
+          leadSelectionGroup.style.display = campaignType === 'specific' ? 'block' : 'none';
+      };
+
+      // Template erstellen
+      async function createTemplate() {
+          showLoader('Template wird erstellt...');
+
+          try {
+              const formData = new FormData(templateForm);
+              const data = {
+                  name: formData.get('name'),
+                  subject: formData.get('subject'),
+                  body: formData.get('body'),
+                  category: formData.get('category')
+              };
+
+              const response = await apiRequest('/email-templates', 'POST', data);
+
+              showAlert('E-Mail-Template erfolgreich erstellt!', 'success');
+              templateForm.reset();
+              loadTemplates();
+              loadTemplateOptions();
+          } catch (error) {
+              showAlert(error.message || 'Fehler beim Erstellen des Templates', 'error');
+          } finally {
+              hideLoader();
+          }
+      }
+
+      // Templates laden
+      async function loadTemplates() {
+          const templatesLoader = document.getElementById('templatesLoader');
+          const templatesTable = document.getElementById('templatesTable');
+          const templatesCard = document.getElementById('templatesCard');
+
+          templatesCard.style.display = 'block';
+          templatesLoader.style.display = 'block';
+          templatesTable.style.display = 'none';
+
+          try {
+              const templates = await apiRequest('/email-templates/all');
+
+              const tbody = document.getElementById('templatesTableBody');
+              tbody.innerHTML = '';
+
+              if (templates.length === 0) {
+                  tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Keine Templates vorhanden</td></tr>';
+              } else {
+                  templates.forEach(template => {
+                      const row = document.createElement('tr');
+                      row.innerHTML = `
+                          <td>${template.name}</td>
+                          <td><span class="badge badge-${getCategoryBadgeClass(template.category)}">${formatCategory(template.category)}</span></td>
+                          <td>${truncateText(template.subject, 50)}</td>
+                          <td>${template.usageCount}x</td>
+                          <td>${formatDate(template.createdDate)}</td>
+                          <td>
+                              <button class="btn btn-secondary btn-sm" onclick="previewTemplate(${template.id})">Vorschau</button>
+                              <button class="btn btn-secondary btn-sm" onclick="editTemplate(${template.id})" style="margin-left: 5px;">Bearbeiten</button>
+                              ${template.active ?
+                                  `<button class="btn btn-secondary btn-sm" onclick="deactivateTemplate(${template.id})" style="margin-left: 5px;">Deaktivieren</button>` :
+                                  `<button class="btn btn-secondary btn-sm" onclick="activateTemplate(${template.id})" style="margin-left: 5px;">Aktivieren</button>`
+                              }
+                          </td>
+                      `;
+                      tbody.appendChild(row);
+                  });
+              }
+
+              templatesLoader.style.display = 'none';
+              templatesTable.style.display = 'block';
+          } catch (error) {
+              showAlert(error.message || 'Fehler beim Laden der Templates', 'error');
+              templatesLoader.style.display = 'none';
+          }
+      }
+
+      // Template-Optionen für Dropdowns laden
+      async function loadTemplateOptions() {
+          try {
+              const templates = await apiRequest('/email-templates');
+
+              // Dropdown-Elemente aktualisieren
+              const selects = ['campaignTemplate', 'testTemplate'];
+              selects.forEach(selectId => {
+                  const select = document.getElementById(selectId);
+                  // Bestehende Optionen löschen (außer der ersten)
+                  while (select.children.length > 1) {
+                      select.removeChild(select.lastChild);
+                  }
+
+                  // Neue Optionen hinzufügen
+                  templates.forEach(template => {
+                      const option = document.createElement('option');
+                      option.value = template.id;
+                      option.textContent = `${template.name} (${formatCategory(template.category)})`;
+                      select.appendChild(option);
+                  });
+              });
+          } catch (error) {
+              console.error('Fehler beim Laden der Template-Optionen:', error);
+          }
+      }
+
+      // Kampagne senden
+      async function sendCampaign() {
+          showLoader('Kampagne wird gesendet...');
+
+          try {
+              const formData = new FormData(campaignForm);
+              const campaignType = formData.get('type');
+              const templateId = parseInt(formData.get('templateId'));
+
+              let endpoint, data;
+
+              if (campaignType === 'all') {
+                  endpoint = '/email-campaigns/send-to-all';
+                  data = { templateId };
+              } else if (campaignType === 'specific') {
+                  endpoint = '/email-campaigns/send-to-leads';
+                  data = {
+                      templateId,
+                      leadIds: formData.get('leadIds')
+                  };
+              } else {
+                  throw new Error('Bitte wählen Sie einen Kampagnen-Typ aus');
+              }
+
+              const response = await apiRequest(endpoint, 'POST', data);
+
+              // Kampagnen-Statistiken anzeigen
+              displayCampaignStats(response.result);
+
+              showAlert('Kampagne erfolgreich gesendet!', 'success');
+              campaignForm.reset();
+              toggleLeadSelection();
+          } catch (error) {
+              showAlert(error.message || 'Fehler beim Senden der Kampagne', 'error');
+          } finally {
+              hideLoader();
+          }
+      }
+
+      // Test-E-Mail senden
+      async function sendTestEmail() {
+          showLoader('Test-E-Mail wird gesendet...');
+
+          try {
+              const formData = new FormData(testEmailForm);
+              const data = {
+                  templateId: parseInt(formData.get('templateId')),
+                  testEmail: formData.get('testEmail'),
+                  testName: formData.get('testName'),
+                  testCompany: formData.get('testCompany'),
+                  testWebsite: formData.get('testWebsite')
+              };
+
+              await apiRequest('/email-campaigns/send-test', 'POST', data);
+
+              showAlert('Test-E-Mail erfolgreich gesendet!', 'success');
+          } catch (error) {
+              showAlert(error.message || 'Fehler beim Senden der Test-E-Mail', 'error');
+          } finally {
+              hideLoader();
+          }
+      }
+
+      // Kampagnen-Statistiken anzeigen
+      function displayCampaignStats(result) {
+          const statsCard = document.getElementById('campaignStatsCard');
+          const statsContent = document.getElementById('campaignStats');
+
+          const successRate = result.successRate || 0;
+          const badgeClass = successRate >= 80 ? 'success' : (successRate >= 50 ? 'warning' : 'error');
+
+          let html = `
+              <div style="display: flex; justify-content: space-around; flex-wrap: wrap; margin-bottom: 20px;">
+                  <div style="text-align: center; margin: 10px;">
+                      <div style="font-size: 2rem; font-weight: 700; color: var(--text-color);">${result.totalLeads}</div>
+                      <div style="color: var(--text-color-secondary);">Gesamt</div>
+                  </div>
+                  <div style="text-align: center; margin: 10px;">
+                      <div style="font-size: 2rem; font-weight: 700; color: var(--success-color);">${result.successCount}</div>
+                      <div style="color: var(--text-color-secondary);">Erfolgreich</div>
+                  </div>
+                  <div style="text-align: center; margin: 10px;">
+                      <div style="font-size: 2rem; font-weight: 700; color: var(--error-color);">${result.errorCount}</div>
+                      <div style="color: var(--text-color-secondary);">Fehler</div>
+                  </div>
+                  <div style="text-align: center; margin: 10px;">
+                      <div style="font-size: 2rem; font-weight: 700;"><span class="badge badge-${badgeClass}">${successRate.toFixed(1)}%</span></div>
+                      <div style="color: var(--text-color-secondary);">Erfolgsrate</div>
+                  </div>
+              </div>
+
+              <div class="alert alert-${result.errorCount > 0 ? 'warning' : 'success'}">
+                  ${result.summary}
+              </div>
+          `;
+
+          if (result.errors && result.errors.length > 0) {
+              html += `
+                  <h4 style="margin-top: 20px; margin-bottom: 10px;">Fehlerdetails:</h4>
+                  <ul style="margin-left: 20px;">
+              `;
+              result.errors.forEach(error => {
+                  html += `<li style="color: var(--error-color);">${error}</li>`;
+              });
+              html += '</ul>';
+          }
+
+          statsContent.innerHTML = html;
+          statsCard.style.display = 'block';
+      }
+
+      // Template-Vorschau
+      window.previewTemplate = async function(templateId) {
+          try {
+              const response = await apiRequest(`/email-templates/${templateId}/preview`, 'POST', {
+                  name: 'Max Mustermann',
+                  email: 'max@beispiel.de',
+                  company: 'Beispiel GmbH',
+                  website: 'https://beispiel.de'
+              });
+
+              const previewCard = document.getElementById('previewCard');
+              const previewContent = document.getElementById('previewContent');
+
+              previewContent.innerHTML = `
+                  <div style="margin-bottom: 20px;">
+                      <h4>Betreff:</h4>
+                      <div style="padding: 10px; background-color: rgba(255,255,255,0.05); border-radius: 5px;">
+                          ${response.subject}
+                      </div>
+                  </div>
+                  <div>
+                      <h4>Nachricht:</h4>
+                      <div style="padding: 15px; background-color: rgba(255,255,255,0.05); border-radius: 5px; white-space: pre-line;">
+                          ${response.body}
+                      </div>
+                  </div>
+              `;
+
+              previewCard.style.display = 'block';
+              showTab('test'); // Zur Test-Sektion wechseln
+          } catch (error) {
+              showAlert(error.message || 'Fehler beim Laden der Vorschau', 'error');
+          }
+      };
+
+      // Template deaktivieren
+      window.deactivateTemplate = async function(templateId) {
+          if (confirm('Sind Sie sicher, dass Sie dieses Template deaktivieren möchten?')) {
+              try {
+                  await apiRequest(`/email-templates/${templateId}`, 'DELETE');
+                  showAlert('Template erfolgreich deaktiviert', 'success');
+                  loadTemplates();
+                  loadTemplateOptions();
+              } catch (error) {
+                  showAlert(error.message || 'Fehler beim Deaktivieren des Templates', 'error');
+              }
+          }
+      };
+
+      // Template aktivieren
+      window.activateTemplate = async function(templateId) {
+          try {
+              await apiRequest(`/email-templates/${templateId}/activate`, 'POST');
+              showAlert('Template erfolgreich aktiviert', 'success');
+              loadTemplates();
+              loadTemplateOptions();
+          } catch (error) {
+              showAlert(error.message || 'Fehler beim Aktivieren des Templates', 'error');
+          }
+      };
+
+      // Hilfsfunktionen
+      function showLoader(text) {
+          loaderText.textContent = text;
+          actionLoader.style.display = 'block';
+      }
+
+      function hideLoader() {
+          actionLoader.style.display = 'none';
+      }
+
+      function getCategoryBadgeClass(category) {
+          switch (category) {
+              case 'welcome': return 'success';
+              case 'follow_up': return 'warning';
+              case 'analysis_report': return 'primary';
+              case 'newsletter': return 'secondary';
+              default: return 'neutral';
+          }
+      }
+
+      function formatCategory(category) {
+          switch (category) {
+              case 'welcome': return 'Willkommen';
+              case 'follow_up': return 'Nachfassen';
+              case 'analysis_report': return 'Analyse';
+              case 'newsletter': return 'Newsletter';
+              default: return category;
+          }
+      }
+
+      function truncateText(text, maxLength) {
+          return text && text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+      }
+  });
+</script>
+</body>
+</html>

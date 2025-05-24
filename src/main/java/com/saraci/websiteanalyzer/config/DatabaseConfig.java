@@ -63,13 +63,14 @@ public class DatabaseConfig {
                 "CREATE TABLE IF NOT EXISTS analysis_results (" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                         "website_id INTEGER NOT NULL, " +
-                        "url TEXT NOT NULL, " + // Neue Spalte für die URL
+                        "url TEXT NOT NULL, " +
                         "analysis_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
                         "pdf_report_path TEXT, " +
                         "FOREIGN KEY (website_id) REFERENCES websites(id)" +
                         ")"
         );
-        // Die SEO-Ergebnisse-Tabelle aktualisieren
+
+        // SEO-Ergebnisse-Tabelle
         connection.createStatement().execute(
                 "CREATE TABLE IF NOT EXISTS seo_results (" +
                         "analysis_id INTEGER PRIMARY KEY, " +
@@ -88,15 +89,6 @@ public class DatabaseConfig {
                         "internal_links INTEGER, " +
                         "external_links INTEGER, " +
                         "score INTEGER, " +
-                        "canonical_url TEXT, " +
-                        "canonical_url_absolute BOOLEAN, " +
-                        "canonical_url_self_referential BOOLEAN, " +
-                        "structured_data_present BOOLEAN, " +
-                        "structured_data_count INTEGER, " +
-                        "jsonld_count INTEGER, " +
-                        "microdata_count INTEGER, " +
-                        "rdfa_count INTEGER, " +
-                        "schema_types TEXT, " +
                         "FOREIGN KEY (analysis_id) REFERENCES analysis_results(id)" +
                         ")"
         );
@@ -156,6 +148,34 @@ public class DatabaseConfig {
                         "last_run TIMESTAMP, " +
                         "next_run TIMESTAMP, " +
                         "FOREIGN KEY (website_id) REFERENCES websites(id)" +
+                        ")"
+        );
+
+        // Leads-Tabelle
+        connection.createStatement().execute(
+                "CREATE TABLE IF NOT EXISTS leads (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        "email TEXT NOT NULL UNIQUE, " +
+                        "name TEXT, " +
+                        "company TEXT, " +
+                        "website TEXT, " +
+                        "created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
+                        "active BOOLEAN DEFAULT 1" +
+                        ")"
+        );
+
+        // E-Mail-Templates-Tabelle
+        connection.createStatement().execute(
+                "CREATE TABLE IF NOT EXISTS email_templates (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        "name TEXT NOT NULL UNIQUE, " +
+                        "subject TEXT NOT NULL, " +
+                        "body TEXT NOT NULL, " +
+                        "category TEXT NOT NULL, " +
+                        "active BOOLEAN DEFAULT 1, " +
+                        "created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
+                        "last_used TIMESTAMP, " +
+                        "usage_count INTEGER DEFAULT 0" +
                         ")"
         );
 
