@@ -6,6 +6,157 @@
   <title>Lead-Management - Website Analyzer</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+  <style>
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+      background-color: var(--card-color);
+      margin: 5% auto;
+      padding: 0;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .close {
+      background: none;
+      border: none;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      color: var(--text-color-secondary);
+      transition: color 0.3s;
+    }
+
+    .close:hover {
+      color: var(--accent-color);
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .modal-footer {
+      padding: 20px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* Search and Filter Styles */
+    .controls {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .filter-select {
+      min-width: 120px;
+    }
+
+    /* Button Styles */
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 5px;
+    }
+
+    /* Status Badge Styles */
+    .status-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-new {
+      background-color: rgba(0, 123, 255, 0.2);
+      color: #007bff;
+    }
+
+    .status-qualified {
+      background-color: rgba(255, 193, 7, 0.2);
+      color: #ffc107;
+    }
+
+    .status-contacted {
+      background-color: rgba(23, 162, 184, 0.2);
+      color: #17a2b8;
+    }
+
+    .status-converted {
+      background-color: rgba(40, 167, 69, 0.2);
+      color: #28a745;
+    }
+
+    .status-lost {
+      background-color: rgba(220, 53, 69, 0.2);
+      color: #dc3545;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .table-container {
+        overflow-x: auto;
+      }
+
+      .btn-group {
+        flex-direction: column;
+      }
+
+      .modal-content {
+        margin: 2% auto;
+        width: 95%;
+      }
+    }
+  </style>
 </head>
 <body>
 <header>
@@ -27,9 +178,7 @@
       <a href="/dashboard.html" class="nav-link">Dashboard</a>
       <a href="/schedules.html" class="nav-link">Zeitpläne</a>
       <a href="/leads.html" class="nav-link active">Leads</a>
-      <a href="/email.html" class="nav-link">E-Mail</a>
-      <a href="/report.html" class="nav-link">Reports</a>
-      <a href="/settings.html" class="nav-link">Settings</a>
+      <a href="/email.html" class="nav-link">E-Mail Marketing</a>
     </div>
   </div>
 </nav>
@@ -38,90 +187,143 @@
   <div class="container">
     <div id="alertContainer"></div>
 
-    <!-- Lead hinzufügen -->
+    <!-- Lead Statistics -->
     <div class="card">
       <div class="card-header">
-        <h2>Neuen Lead hinzufügen</h2>
+        <h2>Lead-Übersicht</h2>
       </div>
       <div class="card-body">
-        <form id="leadForm">
-          <div class="form-group">
-            <label for="leadEmail">E-Mail-Adresse *</label>
-            <input type="email" id="leadEmail" name="email" placeholder="kontakt@beispiel.de" required>
-          </div>
-
-          <div class="form-group">
-            <label for="leadName">Name</label>
-            <input type="text" id="leadName" name="name" placeholder="Max Mustermann">
-          </div>
-
-          <div class="form-group">
-            <label for="leadCompany">Unternehmen</label>
-            <input type="text" id="leadCompany" name="company" placeholder="Beispiel GmbH">
-          </div>
-
-          <div class="form-group">
-            <label for="leadWebsite">Website</label>
-            <input type="url" id="leadWebsite" name="website" placeholder="https://beispiel.de">
-          </div>
-
-          <div style="display: flex; gap: 10px;">
-            <button type="submit" class="btn">Lead hinzufügen</button>
-            <button type="button" class="btn btn-secondary" onclick="clearForm()">Formular leeren</button>
-          </div>
-        </form>
+        <div id="leadStats" class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+          <!-- Statistics will be loaded here -->
+        </div>
       </div>
     </div>
 
-    <!-- Leads-Liste -->
-    <div class="card" id="leadsCard" style="display: none; margin-top: 30px;">
+    <!-- Lead Management -->
+    <div class="card">
       <div class="card-header">
-        <h2>Vorhandene Leads</h2>
-        <div style="display: flex; gap: 10px;">
-          <button class="btn btn-secondary" onclick="exportLeads()">Exportieren</button>
-          <button class="btn" onclick="sendCampaignToAll()">📧 Kampagne senden</button>
-        </div>
+        <h2>Lead-Verwaltung</h2>
+        <button id="addLeadBtn" class="btn">Neuer Lead</button>
       </div>
       <div class="card-body">
+        <!-- Search and Filter Controls -->
+        <div class="controls">
+          <input type="text" id="searchInput" class="search-input" placeholder="Nach Name, E-Mail oder Firma suchen...">
+          <select id="statusFilter" class="filter-select">
+            <option value="">Alle Status</option>
+            <option value="NEW">Neu</option>
+            <option value="QUALIFIED">Qualifiziert</option>
+            <option value="CONTACTED">Kontaktiert</option>
+            <option value="CONVERTED">Konvertiert</option>
+            <option value="LOST">Verloren</option>
+          </select>
+          <button id="refreshBtn" class="btn btn-secondary">Aktualisieren</button>
+        </div>
+
         <div class="loader-container" id="leadsLoader">
           <div class="loader"></div>
           <p>Leads werden geladen...</p>
         </div>
-        <div class="table-container" id="leadsTable" style="display: none;">
-          <table>
-            <thead>
-            <tr>
-              <th>
-                <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
-              </th>
-              <th>E-Mail</th>
-              <th>Name</th>
-              <th>Unternehmen</th>
-              <th>Website</th>
-              <th>Erstellt</th>
-              <th>Status</th>
-              <th>Aktionen</th>
-            </tr>
-            </thead>
-            <tbody id="leadsTableBody">
-            <!-- Leads werden hier eingefügt -->
-            </tbody>
-          </table>
+
+        <div id="leadsTable" style="display: none;">
+          <div class="table-container">
+            <table>
+              <thead>
+              <tr>
+                <th>Name</th>
+                <th>E-Mail</th>
+                <th>Firma</th>
+                <th>Status</th>
+                <th>Quelle</th>
+                <th>Erstellt</th>
+                <th>Aktionen</th>
+              </tr>
+              </thead>
+              <tbody id="leadsTableBody">
+              <!-- Leads will be loaded here -->
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <!-- Bulk-Aktionen -->
-        <div id="bulkActions" style="display: none; margin-top: 20px; padding: 15px; background-color: rgba(255,255,255,0.05); border-radius: 5px;">
-          <span id="selectedCount" style="margin-right: 20px;">0 Leads ausgewählt</span>
-          <button class="btn btn-secondary" onclick="sendCampaignToSelected()">📧 Kampagne an Ausgewählte</button>
-          <button class="btn btn-secondary" onclick="deactivateSelected()" style="margin-left: 10px;">Deaktivieren</button>
+        <div id="noLeads" style="display: none; text-align: center; padding: 40px;">
+          <p>Noch keine Leads vorhanden.</p>
+          <button class="btn" onclick="openAddLeadModal()">Ersten Lead erstellen</button>
         </div>
       </div>
     </div>
+  </div>
+</div>
 
-    <!-- Loader für Aktionen -->
-    <div class="loader-container" id="actionLoader" style="display: none;">
-      <div class="loader"></div>
-      <p id="loaderText">Wird verarbeitet...</p>
+<!-- Add/Edit Lead Modal -->
+<div id="leadModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modalTitle">Neuer Lead</h2>
+      <button class="close" onclick="closeLeadModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="leadForm">
+        <input type="hidden" id="leadId">
+
+        <div class="form-group">
+          <label for="leadName">Name *</label>
+          <input type="text" id="leadName" name="name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="leadEmail">E-Mail *</label>
+          <input type="email" id="leadEmail" name="email" required>
+        </div>
+
+        <div class="form-group">
+          <label for="leadCompany">Firma</label>
+          <input type="text" id="leadCompany" name="company">
+        </div>
+
+        <div class="form-group">
+          <label for="leadWebsite">Website</label>
+          <input type="url" id="leadWebsite" name="website">
+        </div>
+
+        <div class="form-group">
+          <label for="leadPhone">Telefon</label>
+          <input type="tel" id="leadPhone" name="phone">
+        </div>
+
+        <div class="form-group">
+          <label for="leadStatus">Status</label>
+          <select id="leadStatus" name="status">
+            <option value="NEW">Neu</option>
+            <option value="QUALIFIED">Qualifiziert</option>
+            <option value="CONTACTED">Kontaktiert</option>
+            <option value="CONVERTED">Konvertiert</option>
+            <option value="LOST">Verloren</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="leadSource">Quelle</label>
+          <select id="leadSource" name="source">
+            <option value="MANUAL">Manuell</option>
+            <option value="WEBSITE">Website</option>
+            <option value="REFERRAL">Empfehlung</option>
+            <option value="SOCIAL_MEDIA">Social Media</option>
+            <option value="EMAIL">E-Mail</option>
+            <option value="PHONE">Telefon</option>
+            <option value="OTHER">Sonstiges</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="leadNotes">Notizen</label>
+          <textarea id="leadNotes" name="notes" rows="4"></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" onclick="closeLeadModal()">Abbrechen</button>
+      <button type="submit" form="leadForm" class="btn" id="saveLeadBtn">Speichern</button>
     </div>
   </div>
 </div>
@@ -136,9 +338,7 @@
       <a href="/dashboard.html">Dashboard</a>
       <a href="/schedules.html">Zeitpläne</a>
       <a href="/leads.html">Leads</a>
-      <a href="/email.html">E-Mail</a>
-      <a href="/report.html">Reports</a>
-      <a href="/settings.html">Settings</a>
+      <a href="/email.html">E-Mail Marketing</a>
       <a href="https://saraci-design.de" target="_blank">Saraci Design</a>
     </div>
   </div>
@@ -147,224 +347,284 @@
 <script src="js/utils.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-      // DOM-Elemente
-      const leadForm = document.getElementById('leadForm');
-      const leadsLoader = document.getElementById('leadsLoader');
-      const leadsTable = document.getElementById('leadsTable');
-      const leadsCard = document.getElementById('leadsCard');
-      const actionLoader = document.getElementById('actionLoader');
-      const loaderText = document.getElementById('loaderText');
+    // DOM Elements
+    const leadsLoader = document.getElementById('leadsLoader');
+    const leadsTable = document.getElementById('leadsTable');
+    const leadsTableBody = document.getElementById('leadsTableBody');
+    const noLeads = document.getElementById('noLeads');
+    const leadStats = document.getElementById('leadStats');
+    const leadModal = document.getElementById('leadModal');
+    const leadForm = document.getElementById('leadForm');
+    const modalTitle = document.getElementById('modalTitle');
+    const saveLeadBtn = document.getElementById('saveLeadBtn');
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
 
-      // Leads laden
-      loadLeads();
+    // Global variables
+    let allLeads = [];
+    let filteredLeads = [];
+    let editingLeadId = null;
 
-      // Event-Listener für Lead-Formular
-      leadForm.addEventListener('submit', async function(e) {
-          e.preventDefault();
-          await addLead();
+    // Event Listeners
+    document.getElementById('addLeadBtn').addEventListener('click', openAddLeadModal);
+    document.getElementById('refreshBtn').addEventListener('click', loadLeads);
+    searchInput.addEventListener('input', filterLeads);
+    statusFilter.addEventListener('change', filterLeads);
+    leadForm.addEventListener('submit', saveLead);
+
+    // Close modal when clicking outside
+    window.addEventListener('click', function(event) {
+      if (event.target === leadModal) {
+        closeLeadModal();
+      }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape' && leadModal.style.display === 'block') {
+        closeLeadModal();
+      }
+    });
+
+    // Initialize
+    loadLeads();
+    loadStats();
+
+    // Functions
+    async function loadLeads() {
+      try {
+        leadsLoader.style.display = 'block';
+        leadsTable.style.display = 'none';
+        noLeads.style.display = 'none';
+
+        allLeads = await apiRequest('/leads');
+        filteredLeads = [...allLeads];
+
+        if (allLeads.length === 0) {
+          noLeads.style.display = 'block';
+        } else {
+          displayLeads(filteredLeads);
+          leadsTable.style.display = 'block';
+        }
+
+        leadsLoader.style.display = 'none';
+      } catch (error) {
+        showAlert(error.message || 'Fehler beim Laden der Leads', 'error');
+        leadsLoader.style.display = 'none';
+      }
+    }
+
+    async function loadStats() {
+      try {
+        const stats = await apiRequest('/leads/stats');
+        displayStats(stats);
+      } catch (error) {
+        console.error('Fehler beim Laden der Statistiken:', error);
+      }
+    }
+
+    function displayStats(stats) {
+      leadStats.innerHTML = `
+        <div class="grid-item" style="text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: var(--accent-color);">${stats.total || 0}</div>
+          <div style="color: var(--text-color-secondary);">Gesamt</div>
+        </div>
+        <div class="grid-item" style="text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #007bff;">${stats.new || 0}</div>
+          <div style="color: var(--text-color-secondary);">Neu</div>
+        </div>
+        <div class="grid-item" style="text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #ffc107;">${stats.qualified || 0}</div>
+          <div style="color: var(--text-color-secondary);">Qualifiziert</div>
+        </div>
+        <div class="grid-item" style="text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #17a2b8;">${stats.contacted || 0}</div>
+          <div style="color: var(--text-color-secondary);">Kontaktiert</div>
+        </div>
+        <div class="grid-item" style="text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #28a745;">${stats.converted || 0}</div>
+          <div style="color: var(--text-color-secondary);">Konvertiert</div>
+        </div>
+      `;
+    }
+
+    function displayLeads(leads) {
+      leadsTableBody.innerHTML = '';
+
+      leads.forEach(lead => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>
+            <div style="font-weight: 600;">${escapeHtml(lead.name)}</div>
+            ${lead.phone ? `<div style="font-size: 0.8rem; color: var(--text-color-secondary);">${escapeHtml(lead.phone)}</div>` : ''}
+          </td>
+          <td>${escapeHtml(lead.email)}</td>
+          <td>
+            ${lead.company ? `<div>${escapeHtml(lead.company)}</div>` : '<span style="color: var(--text-color-secondary);">-</span>'}
+            ${lead.website ? `<div style="font-size: 0.8rem;"><a href="${escapeHtml(lead.website)}" target="_blank" style="color: var(--accent-color);">${escapeHtml(lead.website)}</a></div>` : ''}
+          </td>
+          <td><span class="status-badge status-${lead.status.toLowerCase()}">${getStatusLabel(lead.status)}</span></td>
+          <td>${getSourceLabel(lead.source)}</td>
+          <td>
+            <div>${formatDate(lead.createdDate)}</div>
+            ${lead.updatedDate && lead.updatedDate !== lead.createdDate ? `<div style="font-size: 0.8rem; color: var(--text-color-secondary);">Aktualisiert: ${formatDate(lead.updatedDate)}</div>` : ''}
+          </td>
+          <td>
+            <div class="btn-group">
+              <button class="btn btn-secondary btn-sm" onclick="editLead(${lead.id})">Bearbeiten</button>
+              <button class="btn btn-secondary btn-sm" onclick="deleteLead(${lead.id}, '${escapeHtml(lead.name)}')">Löschen</button>
+            </div>
+          </td>
+        `;
+        leadsTableBody.appendChild(row);
+      });
+    }
+
+    function filterLeads() {
+      const searchTerm = searchInput.value.toLowerCase().trim();
+      const statusFilterValue = statusFilter.value;
+
+      filteredLeads = allLeads.filter(lead => {
+        // Search filter
+        const matchesSearch = !searchTerm ||
+          lead.name.toLowerCase().includes(searchTerm) ||
+          lead.email.toLowerCase().includes(searchTerm) ||
+          (lead.company && lead.company.toLowerCase().includes(searchTerm));
+
+        // Status filter
+        const matchesStatus = !statusFilterValue || lead.status === statusFilterValue;
+
+        return matchesSearch && matchesStatus;
       });
 
-      // Lead hinzufügen
-      async function addLead() {
-          showLoader('Lead wird hinzugefügt...');
+      displayLeads(filteredLeads);
+    }
 
-          try {
-              const formData = new FormData(leadForm);
-              const data = {
-                  email: formData.get('email'),
-                  name: formData.get('name'),
-                  company: formData.get('company'),
-                  website: formData.get('website')
-              };
+    function openAddLeadModal() {
+      editingLeadId = null;
+      modalTitle.textContent = 'Neuer Lead';
+      saveLeadBtn.textContent = 'Erstellen';
+      leadForm.reset();
+      document.getElementById('leadId').value = '';
+      leadModal.style.display = 'block';
+      document.getElementById('leadName').focus();
+    }
 
-              const response = await apiRequest('/leads', 'POST', data);
+    window.editLead = function(id) {
+      const lead = allLeads.find(l => l.id === id);
+      if (!lead) return;
 
-              showAlert('Lead erfolgreich hinzugefügt!', 'success');
-              leadForm.reset();
-              loadLeads();
-          } catch (error) {
-              showAlert(error.message || 'Fehler beim Hinzufügen des Leads', 'error');
-          } finally {
-              hideLoader();
-          }
+      editingLeadId = id;
+      modalTitle.textContent = 'Lead bearbeiten';
+      saveLeadBtn.textContent = 'Aktualisieren';
+
+      // Fill form with lead data
+      document.getElementById('leadId').value = lead.id;
+      document.getElementById('leadName').value = lead.name || '';
+      document.getElementById('leadEmail').value = lead.email || '';
+      document.getElementById('leadCompany').value = lead.company || '';
+      document.getElementById('leadWebsite').value = lead.website || '';
+      document.getElementById('leadPhone').value = lead.phone || '';
+      document.getElementById('leadStatus').value = lead.status || 'NEW';
+      document.getElementById('leadSource').value = lead.source || 'MANUAL';
+      document.getElementById('leadNotes').value = lead.notes || '';
+
+      leadModal.style.display = 'block';
+      document.getElementById('leadName').focus();
+    };
+
+    window.closeLeadModal = function() {
+      leadModal.style.display = 'none';
+      editingLeadId = null;
+      leadForm.reset();
+    };
+
+    async function saveLead(event) {
+      event.preventDefault();
+
+      const formData = new FormData(leadForm);
+      const leadData = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        company: formData.get('company'),
+        website: formData.get('website'),
+        phone: formData.get('phone'),
+        status: formData.get('status'),
+        source: formData.get('source'),
+        notes: formData.get('notes')
+      };
+
+      try {
+        saveLeadBtn.disabled = true;
+        saveLeadBtn.textContent = 'Speichert...';
+
+        if (editingLeadId) {
+          // Update existing lead
+          await apiRequest(`/leads/${editingLeadId}`, 'PUT', leadData);
+          showAlert('Lead erfolgreich aktualisiert', 'success');
+        } else {
+          // Create new lead
+          await apiRequest('/leads', 'POST', leadData);
+          showAlert('Lead erfolgreich erstellt', 'success');
+        }
+
+        closeLeadModal();
+        loadLeads();
+        loadStats();
+      } catch (error) {
+        showAlert(error.message || 'Fehler beim Speichern des Leads', 'error');
+      } finally {
+        saveLeadBtn.disabled = false;
+        saveLeadBtn.textContent = editingLeadId ? 'Aktualisieren' : 'Erstellen';
+      }
+    }
+
+    window.deleteLead = async function(id, name) {
+      if (!confirm(`Sind Sie sicher, dass Sie den Lead "${name}" löschen möchten?`)) {
+        return;
       }
 
-      // Leads laden
-      async function loadLeads() {
-          leadsCard.style.display = 'block';
-          leadsLoader.style.display = 'block';
-          leadsTable.style.display = 'none';
-
-          try {
-              const leads = await apiRequest('/leads');
-
-              const tbody = document.getElementById('leadsTableBody');
-              tbody.innerHTML = '';
-
-              if (leads.length === 0) {
-                  tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Keine Leads vorhanden</td></tr>';
-              } else {
-                  leads.forEach(lead => {
-                      const row = document.createElement('tr');
-                      row.innerHTML = `
-                          <td>
-                              <input type="checkbox" class="lead-checkbox" value="${lead.id}" onchange="updateBulkActions()">
-                          </td>
-                          <td>${lead.email}</td>
-                          <td>${lead.name || '-'}</td>
-                          <td>${lead.company || '-'}</td>
-                          <td>
-                              ${lead.website ?
-                                  `<a href="${lead.website}" target="_blank" style="color: var(--accent-color);">${truncateUrl(lead.website)}</a>` :
-                                  '-'
-                              }
-                          </td>
-                          <td>${formatDate(lead.createdDate)}</td>
-                          <td>
-                              <span class="badge badge-${lead.active ? 'success' : 'error'}">${lead.active ? 'Aktiv' : 'Inaktiv'}</span>
-                          </td>
-                          <td>
-                              <button class="btn btn-secondary btn-sm" onclick="sendEmailToLead(${lead.id})">📧</button>
-                              <button class="btn btn-secondary btn-sm" onclick="editLead(${lead.id})" style="margin-left: 5px;">Bearbeiten</button>
-                              ${lead.active ?
-                                  `<button class="btn btn-secondary btn-sm" onclick="deactivateLead(${lead.id})" style="margin-left: 5px;">Deaktivieren</button>` :
-                                  `<button class="btn btn-secondary btn-sm" onclick="activateLead(${lead.id})" style="margin-left: 5px;">Aktivieren</button>`
-                              }
-                          </td>
-                      `;
-                      tbody.appendChild(row);
-                  });
-              }
-
-              leadsLoader.style.display = 'none';
-              leadsTable.style.display = 'block';
-          } catch (error) {
-              showAlert(error.message || 'Fehler beim Laden der Leads', 'error');
-              leadsLoader.style.display = 'none';
-          }
+      try {
+        await apiRequest(`/leads/${id}`, 'DELETE');
+        showAlert('Lead erfolgreich gelöscht', 'success');
+        loadLeads();
+        loadStats();
+      } catch (error) {
+        showAlert(error.message || 'Fehler beim Löschen des Leads', 'error');
       }
+    };
 
-      // Formular leeren
-      window.clearForm = function() {
-          leadForm.reset();
+    // Helper functions
+    function getStatusLabel(status) {
+      const statusLabels = {
+        'NEW': 'Neu',
+        'QUALIFIED': 'Qualifiziert',
+        'CONTACTED': 'Kontaktiert',
+        'CONVERTED': 'Konvertiert',
+        'LOST': 'Verloren'
       };
+      return statusLabels[status] || status;
+    }
 
-      // Alle auswählen/abwählen
-      window.toggleSelectAll = function() {
-          const selectAll = document.getElementById('selectAll');
-          const checkboxes = document.querySelectorAll('.lead-checkbox');
-
-          checkboxes.forEach(checkbox => {
-              checkbox.checked = selectAll.checked;
-          });
-
-          updateBulkActions();
+    function getSourceLabel(source) {
+      const sourceLabels = {
+        'MANUAL': 'Manuell',
+        'WEBSITE': 'Website',
+        'REFERRAL': 'Empfehlung',
+        'SOCIAL_MEDIA': 'Social Media',
+        'EMAIL': 'E-Mail',
+        'PHONE': 'Telefon',
+        'OTHER': 'Sonstiges'
       };
+      return sourceLabels[source] || source;
+    }
 
-      // Bulk-Aktionen aktualisieren
-      window.updateBulkActions = function() {
-          const checkboxes = document.querySelectorAll('.lead-checkbox');
-          const checkedBoxes = document.querySelectorAll('.lead-checkbox:checked');
-          const bulkActions = document.getElementById('bulkActions');
-          const selectedCount = document.getElementById('selectedCount');
-
-          if (checkedBoxes.length > 0) {
-              bulkActions.style.display = 'block';
-              selectedCount.textContent = `${checkedBoxes.length} Lead${checkedBoxes.length !== 1 ? 's' : ''} ausgewählt`;
-          } else {
-              bulkActions.style.display = 'none';
-          }
-
-          // "Alle auswählen" Checkbox aktualisieren
-          const selectAll = document.getElementById('selectAll');
-          selectAll.checked = checkedBoxes.length === checkboxes.length && checkboxes.length > 0;
-          selectAll.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < checkboxes.length;
-      };
-
-      // Kampagne an alle Leads senden
-      window.sendCampaignToAll = function() {
-          window.location.href = '/email.html';
-      };
-
-      // Kampagne an ausgewählte Leads senden
-      window.sendCampaignToSelected = function() {
-          const checkedBoxes = document.querySelectorAll('.lead-checkbox:checked');
-          const leadIds = Array.from(checkedBoxes).map(cb => cb.value);
-
-          if (leadIds.length === 0) {
-              showAlert('Bitte wählen Sie mindestens einen Lead aus', 'warning');
-              return;
-          }
-
-          // Zur E-Mail-Seite mit vorausgewählten Lead-IDs weiterleiten
-          window.location.href = `/email.html?leadIds=${leadIds.join(',')}`;
-      };
-
-      // E-Mail an einzelnen Lead senden
-      window.sendEmailToLead = function(leadId) {
-          window.location.href = `/email.html?leadId=${leadId}`;
-      };
-
-      // Lead bearbeiten
-      window.editLead = function(leadId) {
-          showAlert('Bearbeiten-Funktion wird bald verfügbar sein', 'info');
-      };
-
-      // Lead deaktivieren
-      window.deactivateLead = async function(leadId) {
-          if (confirm('Sind Sie sicher, dass Sie diesen Lead deaktivieren möchten?')) {
-              try {
-                  await apiRequest(`/leads/${leadId}`, 'DELETE');
-                  showAlert('Lead erfolgreich deaktiviert', 'success');
-                  loadLeads();
-              } catch (error) {
-                  showAlert(error.message || 'Fehler beim Deaktivieren des Leads', 'error');
-              }
-          }
-      };
-
-      // Ausgewählte Leads deaktivieren
-      window.deactivateSelected = async function() {
-          const checkedBoxes = document.querySelectorAll('.lead-checkbox:checked');
-          const leadIds = Array.from(checkedBoxes).map(cb => cb.value);
-
-          if (leadIds.length === 0) {
-              showAlert('Bitte wählen Sie mindestens einen Lead aus', 'warning');
-              return;
-          }
-
-          if (confirm(`Sind Sie sicher, dass Sie ${leadIds.length} Lead${leadIds.length !== 1 ? 's' : ''} deaktivieren möchten?`)) {
-              showLoader('Leads werden deaktiviert...');
-
-              try {
-                  for (const leadId of leadIds) {
-                      await apiRequest(`/leads/${leadId}`, 'DELETE');
-                  }
-
-                  showAlert(`${leadIds.length} Lead${leadIds.length !== 1 ? 's' : ''} erfolgreich deaktiviert`, 'success');
-                  loadLeads();
-              } catch (error) {
-                  showAlert(error.message || 'Fehler beim Deaktivieren der Leads', 'error');
-              } finally {
-                  hideLoader();
-              }
-          }
-      };
-
-      // Leads exportieren
-      window.exportLeads = function() {
-          showAlert('Export-Funktion wird bald verfügbar sein', 'info');
-      };
-
-      // Hilfsfunktionen
-      function showLoader(text) {
-          loaderText.textContent = text;
-          actionLoader.style.display = 'block';
-      }
-
-      function hideLoader() {
-          actionLoader.style.display = 'none';
-      }
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
   });
 </script>
 </body>

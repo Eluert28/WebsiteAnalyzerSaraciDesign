@@ -3,6 +3,7 @@ package com.saraci.websiteanalyzer.config;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
@@ -33,6 +34,9 @@ public class DatabaseConfig {
 
             // Erstelle die Tabellen
             createTables();
+
+            // Führe Migrations aus
+            runMigrations();
 
             logger.info("Datenbank initialisiert");
         } catch (ClassNotFoundException e) {
@@ -151,16 +155,21 @@ public class DatabaseConfig {
                         ")"
         );
 
-        // Leads-Tabelle
+        // Leads-Tabelle (vollständig neu erstellt)
         connection.createStatement().execute(
                 "CREATE TABLE IF NOT EXISTS leads (" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        "name TEXT NOT NULL, " +
                         "email TEXT NOT NULL UNIQUE, " +
-                        "name TEXT, " +
                         "company TEXT, " +
                         "website TEXT, " +
+                        "phone TEXT, " +
+                        "status TEXT DEFAULT 'NEW', " +
+                        "source TEXT DEFAULT 'MANUAL', " +
+                        "notes TEXT, " +
                         "created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
-                        "active BOOLEAN DEFAULT 1" +
+                        "updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
+                        "is_deleted BOOLEAN DEFAULT 0" +
                         ")"
         );
 
@@ -171,15 +180,91 @@ public class DatabaseConfig {
                         "name TEXT NOT NULL UNIQUE, " +
                         "subject TEXT NOT NULL, " +
                         "body TEXT NOT NULL, " +
-                        "category TEXT NOT NULL, " +
-                        "active BOOLEAN DEFAULT 1, " +
                         "created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
-                        "last_used TIMESTAMP, " +
-                        "usage_count INTEGER DEFAULT 0" +
+                        "updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
                         ")"
         );
 
         logger.info("Tabellen erfolgreich erstellt/überprüft");
+    }
+
+    /**
+     * Führt Datenbank-Migrations aus, um bestehende Tabellen zu aktualisieren.
+     */
+    private static void runMigrations() throws SQLException {
+        logger.info("Starte Datenbank-Migrations...");
+
+        try (Statement stmt = connection.createStatement()) {
+            // Migration 1: Leads-Tabelle erweitern (falls alte Version existiert)
+            try {
+                // Prüfe, ob die Spalte 'is_deleted' bereits existiert
+                stmt.executeQuery("SELECT is_deleted FROM leads LIMIT 1");
+                logger.info("Lead-Tabelle ist bereits aktuell");
+            } catch (SQLException e) {
+                // Spalte existiert nicht, führe Migration aus
+                logger.info("Migriere Lead-Tabelle zu neuer Version...");
+
+                // Backup der alten Daten (falls vorhanden)
+                try {
+                    stmt.execute("CREATE TABLE leads_backup AS SELECT * FROM leads");
+                    logger.info("Backup der alten Lead-Daten erstellt");
+                } catch (SQLException backupError) {
+                    // Tabelle existiert vermutlich noch nicht
+                    logger.info("Keine bestehende Lead-Tabelle gefunden - erstelle neue");
+                }
+
+                // Lösche alte Tabelle und erstelle neue
+                try {
+                    stmt.execute("DROP TABLE IF EXISTS leads");
+                    logger.info("Alte Lead-Tabelle gelöscht");
+                } catch (SQLException dropError) {
+                    logger.warning("Fehler beim Löschen der alten Lead-Tabelle: " + dropError.getMessage());
+                }
+
+                // Erstelle neue Lead-Tabelle mit vollständigem Schema
+                stmt.execute(
+                        "CREATE TABLE leads (" +
+                                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                                "name TEXT NOT NULL, " +
+                                "email TEXT NOT NULL UNIQUE, " +
+                                "company TEXT, " +
+                                "website TEXT, " +
+                                "phone TEXT, " +
+                                "status TEXT DEFAULT 'NEW', " +
+                                "source TEXT DEFAULT 'MANUAL', " +
+                                "notes TEXT, " +
+                                "created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
+                                "updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
+                                "is_deleted BOOLEAN DEFAULT 0" +
+                                ")"
+                );
+                logger.info("Neue Lead-Tabelle mit vollständigem Schema erstellt");
+
+                // Versuche alte Daten zu migrieren (falls Backup existiert)
+                try {
+                    stmt.execute(
+                            "INSERT INTO leads (name, email, company, website, created_date, updated_date, is_deleted) " +
+                                    "SELECT name, email, company, website, " +
+                                    "COALESCE(created_date, CURRENT_TIMESTAMP), " +
+                                    "COALESCE(updated_date, CURRENT_TIMESTAMP), " +
+                                    "0 FROM leads_backup"
+                    );
+                    logger.info("Alte Lead-Daten erfolgreich migriert");
+
+                    // Lösche Backup-Tabelle
+                    stmt.execute("DROP TABLE leads_backup");
+                } catch (SQLException migrateError) {
+                    logger.info("Keine alten Daten zu migrieren: " + migrateError.getMessage());
+                }
+            }
+
+            // Migration 2: Weitere Migrations können hier hinzugefügt werden
+            logger.info("Alle Migrations erfolgreich abgeschlossen");
+
+        } catch (SQLException e) {
+            logger.severe("Fehler bei der Migration: " + e.getMessage());
+            throw e;
+        }
     }
 
     /**
